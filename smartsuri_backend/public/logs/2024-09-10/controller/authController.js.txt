@@ -1,0 +1,5 @@
+2024-09-10T03:48:36.030Z [error] Error logging in: email is not defined 
+2024-09-10T03:49:06.627Z [error] Error logging in: role is not associated to user! 
+2024-09-10T03:50:54.932Z [error] Error logging in: role is not associated to user! 
+2024-09-10T05:51:44.769Z [error] Error during login: Role is not defined 
+2024-09-10T05:52:38.988Z [error] Error during login: bcrypt is not defined 

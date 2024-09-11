@@ -1,0 +1,7 @@
+# Ignore node_modules directory
+node_modules/
+# public/logs/
+
+# Ignore env and vscode files
+.env
+.vscode/

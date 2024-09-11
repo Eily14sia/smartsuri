@@ -1,0 +1,84 @@
+2024-09-10T02:46:20.735Z [info] App is running on port 8000 
+2024-09-10T02:46:20.737Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T02:46:20.775Z [info] Database connection tested successfully. 
+2024-09-10T02:46:53.149Z [info] App is running on port 8000 
+2024-09-10T02:46:53.151Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T02:46:53.187Z [info] Database connection tested successfully. 
+2024-09-10T03:15:16.391Z [info] App is running on port 8000 
+2024-09-10T03:15:16.394Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:15:16.445Z [info] Database connection tested successfully. 
+2024-09-10T03:15:30.628Z [info] App is running on port 8000 
+2024-09-10T03:15:30.630Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:15:30.668Z [info] Database connection tested successfully. 
+2024-09-10T03:20:46.729Z [info] App is running on port 8000 
+2024-09-10T03:20:46.731Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:20:46.773Z [info] Database connection tested successfully. 
+2024-09-10T03:20:49.583Z [info] App is running on port 8000 
+2024-09-10T03:20:49.585Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:20:49.621Z [info] Database connection tested successfully. 
+2024-09-10T03:21:21.227Z [info] App is running on port 8000 
+2024-09-10T03:21:21.229Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:21:21.266Z [info] Database connection tested successfully. 
+2024-09-10T03:22:16.823Z [info] App is running on port 8000 
+2024-09-10T03:22:16.825Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:22:16.860Z [info] Database connection tested successfully. 
+2024-09-10T03:24:20.145Z [info] App is running on port 8000 
+2024-09-10T03:24:20.148Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:24:20.189Z [info] Database connection tested successfully. 
+2024-09-10T03:27:17.069Z [info] App is running on port 8000 
+2024-09-10T03:27:17.071Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:27:17.114Z [info] Database connection tested successfully. 
+2024-09-10T03:48:07.831Z [info] App is running on port 8000 
+2024-09-10T03:48:07.833Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:48:07.870Z [info] Database connection tested successfully. 
+2024-09-10T03:48:32.633Z [info] App is running on port 8000 
+2024-09-10T03:48:32.635Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:48:32.693Z [info] Database connection tested successfully. 
+2024-09-10T03:49:04.709Z [info] App is running on port 8000 
+2024-09-10T03:49:04.711Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:49:04.755Z [info] Database connection tested successfully. 
+2024-09-10T03:50:52.412Z [info] App is running on port 8000 
+2024-09-10T03:50:52.414Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:50:52.461Z [info] Database connection tested successfully. 
+2024-09-10T03:51:43.554Z [info] App is running on port 8000 
+2024-09-10T03:51:43.556Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T03:51:43.597Z [info] Database connection tested successfully. 
+2024-09-10T05:10:24.417Z [info] App is running on port 8000 
+2024-09-10T05:10:24.420Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T05:10:24.478Z [info] Database connection tested successfully. 
+2024-09-10T05:10:40.441Z [info] App is running on port 8000 
+2024-09-10T05:10:40.444Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T05:10:40.471Z [info] Database connection tested successfully. 
+2024-09-10T05:11:08.053Z [info] App is running on port 8000 
+2024-09-10T05:11:08.055Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T05:11:08.081Z [info] Database connection tested successfully. 
+2024-09-10T05:37:27.754Z [info] App is running on port 8000 
+2024-09-10T05:37:27.757Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T05:37:27.785Z [info] Database connection tested successfully. 
+2024-09-10T05:39:26.924Z [info] App is running on port 8000 
+2024-09-10T05:39:26.926Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T05:39:26.958Z [info] Database connection tested successfully. 
+2024-09-10T05:41:38.396Z [info] App is running on port 8000 
+2024-09-10T05:41:38.398Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T05:41:38.432Z [info] Database connection tested successfully. 
+2024-09-10T05:52:36.778Z [info] App is running on port 8000 
+2024-09-10T05:52:36.780Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T05:52:36.814Z [info] Database connection tested successfully. 
+2024-09-10T05:53:20.182Z [info] App is running on port 8000 
+2024-09-10T05:53:20.184Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T05:53:20.212Z [info] Database connection tested successfully. 
+2024-09-10T06:33:15.422Z [info] App is running on port 8000 
+2024-09-10T06:33:15.425Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T06:33:15.456Z [info] Database connection tested successfully. 
+2024-09-10T06:36:53.395Z [info] App is running on port 8000 
+2024-09-10T06:36:53.397Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T06:36:53.427Z [info] Database connection tested successfully. 
+2024-09-10T06:37:04.396Z [info] App is running on port 8000 
+2024-09-10T06:37:04.398Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T06:37:04.439Z [info] Database connection tested successfully. 
+2024-09-10T06:43:35.612Z [info] App is running on port 8000 
+2024-09-10T06:43:35.614Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T06:43:35.655Z [info] Database connection tested successfully. 
+2024-09-10T08:58:37.519Z [info] App is running on port 8000 
+2024-09-10T08:58:37.524Z [info] Swagger API docs are available at http://localhost:8000/api-docs 
+2024-09-10T08:58:37.604Z [info] Database connection tested successfully. 
