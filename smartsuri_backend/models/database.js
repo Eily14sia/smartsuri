@@ -5,34 +5,6 @@ const commonOptions = {
   timestamps: false, // Disable timestamps
 }
 
-const Role = sequelize.define(
-  'role',
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true, // Assuming active by default
-    },
-    created_by: DataTypes.INTEGER,
-    updated_by: DataTypes.INTEGER,
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE,
-    deleted_at: DataTypes.DATE,
-  },
-  { ...commonOptions, tableName: 'role' },
-)
-
 const User = sequelize.define(
   'user',
   {
@@ -43,10 +15,6 @@ const User = sequelize.define(
       autoIncrement: true,
     },
     username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -72,10 +40,6 @@ const User = sequelize.define(
     },
     isActive: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
-    },
-    role_id: {
-      type: DataTypes.INTEGER,
       allowNull: false,
     },
     created_by: DataTypes.INTEGER,
@@ -125,9 +89,6 @@ const LogMaster = sequelize.define(
   },
   { ...commonOptions, tableName: 'logmaster' },
 )
-
-User.belongsTo(Role, { foreignKey: 'role_id', as: 'role' })
-Role.hasMany(User, { foreignKey: 'role_id' })
 
 const logUpdate = async (instance, options) => {
   const tableName = instance.constructor.tableName
@@ -197,4 +158,4 @@ User.addHook('afterUpdate', logUpdate)
 User.addHook('afterCreate', logCreate)
 
 
-module.exports = { User, Role, LogMaster, sequelize }
+module.exports = { User, LogMaster, sequelize }

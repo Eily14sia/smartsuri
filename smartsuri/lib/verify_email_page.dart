@@ -1,12 +1,106 @@
 import 'package:flutter/material.dart';
 import 'signup_success_page.dart';  // Import SignupSuccessPage
+import 'package:http/http.dart' as http;  // Import http package
+import 'package:flutter_dotenv/flutter_dotenv.dart';  // Import dotenv for environment variables
+import 'dart:convert'; 
 
 class VerifyEmailPage extends StatelessWidget {
-  const VerifyEmailPage({super.key});
+  final String email;  // Declare email as a final field
+
+  const VerifyEmailPage({Key? key, required this.email}) : super(key: key);  // Initialize email in the constructor
 
   @override
   Widget build(BuildContext context) {
     final TextEditingController codeController = TextEditingController();
+
+    Future<void> _verifyEmail() async {
+      final String code = codeController.text;
+      final String apiUrl = dotenv.env['API_URL'] ?? '';  // Get API URL from env file
+
+      if (apiUrl.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('API URL is not configured')),
+        );
+        return;
+      }
+
+      final Uri url = Uri.parse('$apiUrl/crud/user/verifyEmail');  // Adjust the endpoint if needed
+
+      try {
+        final response = await http.post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'email': email,
+            'code': code,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          // Handle successful response
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SignupSuccessPage(),
+            ),
+          );
+        } else {
+          // Handle error response
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Verification failed: ${response.reasonPhrase}')),
+          );
+        }
+      } catch (e) {
+        // Handle network error
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Network error occurred')),
+        );
+      }
+    }
+
+     Future<void> _resendVerificationCode() async {
+    final String apiUrl = dotenv.env['API_URL'] ?? '';  // Get API URL from env file
+
+    if (apiUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('API URL is not configured')),
+      );
+      return;
+    }
+
+    final Uri url = Uri.parse('$apiUrl/auth/resendCode');  // Adjust the endpoint if needed
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Handle successful response
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Verification code resent successfully')),
+        );
+      } else {
+        // Handle error response
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to resend verification code: ${response.reasonPhrase}')),
+        );
+      }
+    } catch (e) {
+      // Handle network error
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Network error occurred')),
+      );
+    }
+  }
 
     return Scaffold(
       appBar: AppBar(
@@ -83,13 +177,8 @@ class VerifyEmailPage extends StatelessWidget {
                 // Verify Button
                 ElevatedButton(
                   onPressed: () {
-                    // After verification, navigate to SignupSuccessPage
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SignupSuccessPage(),
-                      ),
-                    );
+                    // Call _verifyEmail when button is pressed
+                    _verifyEmail();
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
@@ -105,12 +194,10 @@ class VerifyEmailPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 // Option to resend the code
-                TextButton(
+                 TextButton(
                   onPressed: () {
-                    // Resend code logic
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Verification code resent')),
-                    );
+                    // Call _resendVerificationCode when button is pressed
+                    _resendVerificationCode();
                   },
                   child: Text(
                     'Resend Code?',

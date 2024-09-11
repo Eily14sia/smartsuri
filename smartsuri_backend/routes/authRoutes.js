@@ -7,6 +7,7 @@ const multer = require('multer')
 const upload = multer()
 
 router.post('/login', upload.none(), AuthController.login)
-router.post('/verifcode', upload.none(), AuthController.verifyCode)
+router.post('/verifCode', upload.none(), AuthController.verifyCode)
+router.post('/resendCode', AuthController.resendVerificationCode);
 
 module.exports = router

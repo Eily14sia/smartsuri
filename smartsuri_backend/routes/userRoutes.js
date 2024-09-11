@@ -14,9 +14,10 @@ const upload = multer();
 // User Create (Signup), Update, and Delete
 // Signup endpoint should not require authentication
 router.post('/createUser', upload.none(), UserController.createUser);
+router.post('/verifyEmail', upload.none(), UserController.verifyEmail)
 
 // Other endpoints that require authentication
-router.put('/updateUser/:id', authenticateToken, upload.none(), UserController.updateUser);
-router.delete('/deleteUser/:id', authenticateToken, UserController.deleteUser);
+router.put('/updateUser/:id', authenticateToken, upload.none(), UserController.updateAndSaveUser);
+// router.delete('/deleteUser/:id', authenticateToken, UserController.deleteUser);
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const { Sequelize } = require('sequelize')
 const dotenv = require('dotenv').config()
-const getLogger = require('../sspiaccount_api/utils/logger')
+const getLogger = require('../smartsuri_backend/utils/logger')
 
 const logger = getLogger(__filename)
 

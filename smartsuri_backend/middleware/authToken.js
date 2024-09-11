@@ -16,7 +16,8 @@ const emailFrom = process.env.EMAIL_FROM;
 const logger = getLogger(__filename);
 
 // In-memory storage for verification codes
-const verificationCodes = new Map(); // Key: email, Value: { code: string, expiry: Date }
+const verificationCodes = new Map(); 
+const temporaryUsers = new Map(); 
 
 class AuthService {
   constructor() {
@@ -182,6 +183,9 @@ class AuthService {
     // Store the code in the in-memory storage
     verificationCodes.set(user.email, { code: verificationCode, expiry });
 
+    // Store user details temporarily
+    temporaryUsers.set(user.email, user);
+
     await this.sendVerificationEmail(user.email, verificationCode);
   }
 
@@ -194,6 +198,40 @@ class AuthService {
 
     // Remove the code from in-memory storage after successful verification
     verificationCodes.delete(userEmail);
+
+    // Retrieve and remove the user from temporary storage
+    const temporaryUser = temporaryUsers.get(userEmail);
+
+    if (!temporaryUser) {
+      throw new Error('No temporary user found');
+    }
+
+    temporaryUsers.delete(userEmail);
+
+    // Return user data for the controller to handle database creation
+    return temporaryUser;
+  }
+
+  async resendVerificationCode(email) {
+    // Check if the email is in temporary users' storage
+    if (!temporaryUsers.has(email)) {
+      throw new Error('Email is not pending verification');
+    }
+
+    // Generate a new verification code
+    const verificationCode = crypto.randomBytes(3).toString('hex').toUpperCase(); // 6-character code
+    const expiry = new Date(Date.now() + 3600000); // 1 hour expiry
+
+    // Update the existing verification code and expiry
+    verificationCodes.set(email, { code: verificationCode, expiry });
+
+    // Retrieve the user from temporary storage
+    const user = temporaryUsers.get(email);
+
+    // Send the new verification code via email
+    await this.sendVerificationEmail(email, verificationCode);
+
+    return verificationCode; // Optionally return the new code
   }
 }
 

@@ -3,6 +3,14 @@ import 'verify_email_page.dart';
 import 'terms_conditions.dart'; 
 import 'privacy_policy.dart'; 
 import 'login_page.dart'; 
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/services.dart'; // For rootBundle to load assets
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:image_picker/image_picker.dart'; // Import image_picker
+import 'dart:typed_data'; // For Uint8List
+import 'package:flutter/foundation.dart' as foundation; // For platform check
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -13,16 +21,80 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController birthdayController = TextEditingController();
-  final TextEditingController cityController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final birthdayController = TextEditingController();
+  final cityController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  String selectedProfileImage = '';
   bool agreeToTerms = false;
   bool _isPasswordHidden = true;
   bool _isConfirmPasswordHidden = true;
-  String selectedProfileImage = '';
+
+  Future<bool> _sendDataToAPI() async {
+  if (_formKey.currentState!.validate() && agreeToTerms) {
+    final apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+
+    if (apiUrl.isNotEmpty) {
+      try {
+        final response = await http.post(
+          Uri.parse('$apiUrl/crud/user/createUser'), // Adjust the endpoint if needed
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'username': nameController.text,
+            'email': emailController.text,
+            'birthday': birthdayController.text,
+            'city': cityController.text,
+            'password': passwordController.text,
+            'confirm_password': confirmPasswordController.text,
+            'prof_img': selectedProfileImage, // Directly use the Base64 string
+          }),
+        );
+       if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign up successful!')));
+          return true; // Indicate success
+        } else if (response.statusCode == 400) {
+          // Handle case where the user already exists
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User already exists.')));
+          return false; // Indicate failure
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign up failed.')));
+          return false; // Indicate failure
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('An error occurred.')));
+        return false; // Indicate failure
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('API URL is not configured.')));
+      return false; // Indicate failure
+    }
+  }
+  return false; // Indicate failure if form validation or terms agreement fails
+}
+
+ Future<void> _pickImageFromGallery() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      if (foundation.kIsWeb) {
+        // For Web: Convert the pickedFile to base64
+        final bytes = await pickedFile.readAsBytes(); // Uint8List bytes for web
+        setState(() {
+          selectedProfileImage = base64Encode(bytes); // Convert to base64 string
+        });
+      } else {
+        // For Mobile/Desktop: Read file as bytes and convert to base64
+        final bytes = await File(pickedFile.path).readAsBytes();
+        setState(() {
+          selectedProfileImage = base64Encode(bytes);
+        });
+      }
+    }
+ }
 
   final List<String> cities = [
     'Caloocan', 'Las Piñas', 'Makati', 'Malabon', 'Mandaluyong', 'Manila',
@@ -77,11 +149,11 @@ class _SignUpPageState extends State<SignUpPage> {
               const SizedBox(height: 30),
               const Text('Select Profile Image:', style: TextStyle(color: Colors.grey, fontSize: 16)),
               const SizedBox(height: 10),
-              _buildProfileImages(),
+              _buildProfileImageSelector(),
               const SizedBox(height: 20),
               _buildTermsAndPrivacy(),
               const SizedBox(height: 30),
-              _buildSignUpButton(),
+              _buildSignUpButton(context),
               const SizedBox(height: 30),
               _buildLoginText(),
             ],
@@ -90,6 +162,23 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
+
+
+Widget _buildProfileImageSelector() {
+  return GestureDetector(
+    onTap: _pickImageFromGallery,
+    child: CircleAvatar(
+      radius: 50,
+      backgroundColor: Colors.grey[300],
+      backgroundImage: selectedProfileImage.isNotEmpty
+          ? MemoryImage(base64Decode(selectedProfileImage)) // Display base64 image
+          : null,
+      child: selectedProfileImage.isEmpty
+          ? Icon(Icons.add_a_photo, color: Colors.grey[600], size: 50)
+          : null,
+    ),
+  );
+}
 
   Widget _buildRoundedButton(TextEditingController controller, String label, {bool isPassword = false}) {
     return TextFormField(
@@ -215,45 +304,6 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Widget _buildProfileImages() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildProfileImageChoice('assets/profile1.png'),
-        const SizedBox(width: 8), // Reduced the spacing
-        _buildProfileImageChoice('assets/profile2.png'),
-        const SizedBox(width: 8),
-        _buildProfileImageChoice('assets/profile3.png'),
-        const SizedBox(width: 8),
-        _buildProfileImageChoice('assets/profile4.png'),
-        const SizedBox(width: 8),
-        _buildProfileImageChoice('assets/ayaw.png'), // Added new profile image
-      ],
-    );
-  }
-
-  Widget _buildProfileImageChoice(String imagePath) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedProfileImage = imagePath;
-        });
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: selectedProfileImage == imagePath
-              ? Border.all(color: Colors.green[900]!, width: 2) // Match green from login
-              : null,
-        ),
-        child: CircleAvatar(
-          radius: 25, // Reduced the size of the avatar
-          backgroundImage: AssetImage(imagePath),
-        ),
-      ),
-    );
-  }
-
   Widget _buildTermsAndPrivacy() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -301,27 +351,43 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Widget _buildSignUpButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {
-          if (_formKey.currentState!.validate() && agreeToTerms) {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const VerifyEmailPage()));
+Widget _buildSignUpButton(BuildContext context) {
+  return SizedBox(
+    width: double.infinity,
+    child: ElevatedButton(
+      onPressed: () async {
+        if (_formKey.currentState!.validate() && agreeToTerms) {
+          // Call _sendDataToAPI to handle the API request
+          bool success = await _sendDataToAPI();
+
+          if (success) {
+            // Navigate to the verification page with the email
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VerifyEmailPage(email: emailController.text),
+              ),
+            );
+          } else {
+            // Handle API response error
+            // Optionally show an error message
           }
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green[900]!, // Match dark green color from login
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        ),
-        child: const Text(
-          'Sign Up',
-          style: TextStyle(color: Colors.white, fontSize: 18), // White font color for button
-        ),
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.green[900]!, // Match dark green color from login
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
-    );
-  }
+      child: const Text(
+        'Sign Up',
+        style: TextStyle(color: Colors.white, fontSize: 18), // White font color for button
+      ),
+    ),
+  );
+}
+
+
 
   Widget _buildLoginText() {
     return GestureDetector(

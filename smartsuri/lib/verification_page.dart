@@ -21,7 +21,7 @@ class VerificationPage extends StatelessWidget {
 
     try {
       final response = await http.post(
-        Uri.parse('$apiUrl/auth/verifcode'), // Correct URL
+        Uri.parse('$apiUrl/auth/verifCode'), // Correct URL
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'code': code}),
       );
@@ -42,6 +42,36 @@ class VerificationPage extends StatelessWidget {
         // Handle error
         final responseBody = jsonDecode(response.body);
         final errorMessage = responseBody['errorMessage'] ?? 'Invalid verification code';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $error')),
+      );
+    }
+  }
+
+  Future<void> resendVerificationCode(BuildContext context) async {
+    final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+
+    try {
+      final response = await http.post(
+        Uri.parse('$apiUrl/auth/resendCode'), // URL for resending the code
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      if (response.statusCode == 200) {
+        // Handle success
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Verification code resent successfully')),
+        );
+      } else {
+        // Handle error
+        final responseBody = jsonDecode(response.body);
+        final errorMessage = responseBody['errorMessage'] ?? 'Failed to resend verification code';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
         );
@@ -158,11 +188,10 @@ class VerificationPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
+                 const SizedBox(height: 20),
                 TextButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Verification code resent')),
-                    );
+                    resendVerificationCode(context);
                   },
                   child: Text(
                     'Resend Code?',

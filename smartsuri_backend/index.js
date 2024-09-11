@@ -16,7 +16,7 @@ const { swaggerUi, specs } = require('./swagger')
 
 // Routes
 const authRoutes = require('./routes/authRoutes')
-// const crudRoutes = require('./routes/crudRoutes')
+const crudRoutes = require('./routes/crudRoutes')
 // const superAdminRoutes = require('./routes/superAdminRoutes')
 
 testConnection()
@@ -38,7 +38,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
 // API routes
 app.use('/api/auth', authRoutes)
-// app.use('/api/crud', crudRoutes)
+app.use('/api/crud', crudRoutes)
 // app.use('/api/superAdmin', superAdminRoutes)
 
 // Start the server
