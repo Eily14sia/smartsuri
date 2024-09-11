@@ -18,7 +18,7 @@ module.exports = {
       // Insert data into Users table
       await queryInterface.sequelize.query(`
         INSERT INTO \`users\` VALUES 
-        (1, 'Admin', '$2b$10$slexw2cnG4U0diTzPuDlW.sv3ShEMbamEi.Wuh2fu2AL58Sn.UGPq', '2024-09-10 05:47:07', 'Manila', 'barveilyengco1214@gmail.com', NULL, 1, '2024-09-10 11:47:38', '2024-09-10 13:56:02', NULL, NULL, NULL, NULL)
+        (1, 'Admin', '$2b$10$slexw2cnG4U0diTzPuDlW.sv3ShEMbamEi.Wuh2fu2AL58Sn.UGPq', '2024-09-10 05:47:07', 'Manila', 'glynserbi.study@gmail.com', NULL, 1, '2024-09-10 11:47:38', '2024-09-10 13:56:02', NULL, NULL, NULL, NULL)
         `)
 
       // Insert data into LogMaster table
