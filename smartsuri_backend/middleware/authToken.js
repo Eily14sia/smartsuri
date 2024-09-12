@@ -233,6 +233,25 @@ class AuthService {
 
     return verificationCode; // Optionally return the new code
   }
+
+   async sendResetPasswordEmail(email, verificationCode) {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',  // Use your mail service provider
+      auth: {
+        user: process.env.EMAIL_USER,  // Your email
+        pass: process.env.EMAIL_PASS,  // Your email password
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Email Password Reset Request Verification',
+      text: `Your verification code is: ${verificationCode}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+  }
 }
 
 module.exports = new AuthService();

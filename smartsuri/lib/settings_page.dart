@@ -3,9 +3,20 @@ import 'about_us.dart'; // For navigation to About App
 import 'terms_conditions.dart'; // For navigation to Terms & Conditions
 import 'privacy_policy.dart'; // For navigation to Privacy Policy
 import 'main.dart'; // For redirection after logging out
+import 'dart:typed_data';
+import 'dart:convert'; // Import to use base64Decode
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  final String profileImage;
+  final String userName;
+  final String email;
+
+  const SettingsPage({
+    super.key,
+    required this.profileImage,
+    required this.userName,
+    required this.email,
+  });
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -13,6 +24,23 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   String _selectedProfileImage = 'assets/profile2.png';
+  Uint8List? _decodedImage;
+
+  @override
+  void initState() {
+    super.initState();
+    _decodeProfileImage();
+  }
+
+  void _decodeProfileImage() {
+    if (widget.profileImage.isNotEmpty) {
+      try {
+        _decodedImage = base64Decode(widget.profileImage);
+      } catch (e) {
+        print('Error decoding Base64 image: $e');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,17 +78,19 @@ class _SettingsPageState extends State<SettingsPage> {
                   children: [
                     CircleAvatar(
                       radius: 40,
-                      backgroundImage: AssetImage(_selectedProfileImage), // Dynamic profile image
+                      backgroundImage: _decodedImage != null
+                          ? MemoryImage(_decodedImage!)
+                          : AssetImage(_selectedProfileImage) as ImageProvider, // Dynamic profile image
                       backgroundColor: Colors.green[200], // Placeholder background color
                     ),
                     const SizedBox(height: 10),
-                    const Text(
-                      'Name', // Dynamic user name
+                    Text(
+                      widget.userName, // Dynamic user name
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                     ),
                     const SizedBox(height: 5),
-                    const Text(
-                      'email@example.com', // Dynamic or sample email
+                    Text(
+                      widget.email, // Dynamic email
                       style: TextStyle(fontSize: 14, color: Colors.black),
                     ),
                   ],
@@ -261,7 +291,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.green[900],
                   ),
@@ -269,22 +299,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 20),
                 content,
                 const SizedBox(height: 20),
-                Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: _buttonStyle(),
-                      child: const Text('Cancel'),
-                    ),
-                    const SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Handle the update logic here
-                      },
-                      style: _buttonStyle(),
-                      child: const Text('Update'),
-                    ),
-                  ],
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: _buttonStyle(), // Green background with white text
+                  child: const Text('Save'),
                 ),
               ],
             ),
@@ -294,154 +312,84 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // Profile Images Picker
+  // Create custom text field
+  Widget _buildCustomTextField(String hint, {bool isPassword = false}) {
+    return TextField(
+      obscureText: isPassword,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        hintText: hint,
+      ),
+    );
+  }
+
+  // Create birthday field
+  Widget _buildBirthdayField() {
+    return TextField(
+      decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        hintText: 'Enter your birthday',
+        suffixIcon: IconButton(
+          icon: Icon(Icons.calendar_today),
+          onPressed: () {
+            // Add date picker logic
+          },
+        ),
+      ),
+    );
+  }
+
+  // Create city dropdown
+  Widget _buildCityDropdown() {
+    return DropdownButtonFormField<String>(
+      decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        hintText: 'Select your city',
+      ),
+      items: <String>['City1', 'City2', 'City3'].map((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        // Handle city selection
+      },
+    );
+  }
+
+  // Create profile images
   Widget _buildProfileImages() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Wrap(
+      spacing: 10,
       children: [
-        _buildProfileImageChoice('assets/profile1.png'),
-        _buildProfileImageChoice('assets/profile2.png'),
-        _buildProfileImageChoice('assets/profile3.png'),
-        _buildProfileImageChoice('assets/profile4.png'),
-        _buildProfileImageChoice('assets/ayaw.png'),
+        _buildProfileImageOption('assets/profile1.png'),
+        _buildProfileImageOption('assets/profile2.png'),
+        _buildProfileImageOption('assets/profile3.png'),
       ],
     );
   }
 
-  Widget _buildProfileImageChoice(String imagePath) {
+  // Create profile image option
+  Widget _buildProfileImageOption(String assetPath) {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedProfileImage = imagePath;
+          _selectedProfileImage = assetPath;
         });
       },
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle, // Make the image circular
-          border: _selectedProfileImage == imagePath
-              ? Border.all(color: Colors.green[900]!, width: 2) // Add green border when selected
-              : null,
-        ),
-        child: CircleAvatar(
-          radius: 25, // Adjust radius as needed
-          backgroundImage: AssetImage(imagePath),
-        ),
+      child: CircleAvatar(
+        radius: 30,
+        backgroundImage: AssetImage(assetPath),
       ),
     );
   }
 
-  // City Dropdown Field
-  Widget _buildCityDropdown() {
-    final List<String> cities = [
-      'Caloocan', 'Las Piñas', 'Makati', 'Malabon', 'Mandaluyong',
-      'Manila', 'Marikina', 'Muntinlupa', 'Navotas', 'Parañaque',
-      'Pasay', 'Pasig', 'Quezon City', 'San Juan', 'Taguig', 'Valenzuela'
-    ];
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.green[50], // Match the filled background from the other text fields
-        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
-          borderSide: BorderSide.none, // No outline for consistency
-        ),
-        labelText: 'City',
-        labelStyle: TextStyle(color: Colors.green[700]!),
-      ),
-      items: cities.map((String city) {
-        return DropdownMenuItem<String>(
-          value: city,
-          child: Text(city),
-        );
-      }).toList(),
-      onChanged: (String? newValue) {},
+  // Common button style
+  ButtonStyle _buttonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: Colors.green[900], // Green background
+      foregroundColor: Colors.white, // White text color
     );
   }
-
-  // Birthday Field
-  // Update the _buildBirthdayField method to include the validation check
-Widget _buildBirthdayField() {
-  TextEditingController birthdayController = TextEditingController();
-  return TextField(
-    controller: birthdayController,
-    decoration: InputDecoration(
-      filled: true,
-      fillColor: Colors.green[50], // Match the filled background
-      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(30.0),
-        borderSide: BorderSide.none, // No outline for consistency
-      ),
-      labelText: 'Birthday',
-      suffixIcon: Icon(Icons.calendar_today, color: Colors.green[700]!),
-      labelStyle: TextStyle(color: Colors.green[700]!),
-    ),
-    readOnly: true,
-    onTap: () async {
-      DateTime? pickedDate = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(1900),
-        lastDate: DateTime.now(),
-      );
-      int age = DateTime.now().year - pickedDate!.year;
-      if (age < 13) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("You must be at least 13 years old.")));
-      } else {
-        birthdayController.text = '${pickedDate.year}-${pickedDate.month}-${pickedDate.day}';
-      }
-        },
-  );
-}
-
-bool _isPasswordHidden = true;
-
-  // Custom TextField Builder
- // Update the _buildCustomTextField method to include password toggle
-Widget _buildCustomTextField(String hintText, {bool isPassword = false}) {
-  return TextField(
-    obscureText: isPassword && _isPasswordHidden, // Toggle based on visibility
-    decoration: InputDecoration(
-      filled: true,
-      fillColor: Colors.green[50], // Match the filled background
-      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(30.0),
-        borderSide: BorderSide.none, // No outline for consistency
-      ),
-      labelText: hintText,
-      labelStyle: TextStyle(color: Colors.green[700]!),
-      suffixIcon: isPassword
-          ? IconButton(
-              icon: Icon(
-                _isPasswordHidden ? Icons.visibility_off : Icons.visibility,
-                color: Colors.green[700]!, // Green eye icon color
-              ),
-              onPressed: () {
-                setState(() {
-                  _isPasswordHidden = !_isPasswordHidden; // Toggle the state
-                });
-              },
-            )
-          : null, // Show eye icon only for password fields
-    ),
-  );
-}
-
-  // Button Style
-ButtonStyle _buttonStyle() {
-  return ElevatedButton.styleFrom(
-    backgroundColor: Colors.white, // White background
-    padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 18),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(30.0),
-      side: BorderSide(color: Colors.green[900]!, width: 2), // Green border
-    ),
-    textStyle: TextStyle(
-      color: Colors.green[900], // Set green font color
-    ),
-  );
-}
-
 }

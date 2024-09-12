@@ -4,6 +4,8 @@ import 'events_button.dart'; // Import the EventsButtonPage
 import 'my_profile_page.dart'; // Import MyProfilePage
 import 'settings_page.dart'; // Import SettingsPage
 import 'home_page.dart'; // Import HomePage
+import 'dart:typed_data';
+import 'dart:convert'; // Import to use base64Decode
 
 class FindEventsPage extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -12,7 +14,8 @@ class FindEventsPage extends StatelessWidget {
   final String userName;
   final String email;
 
-  FindEventsPage({super.key, 
+  FindEventsPage({
+    super.key,
     required this.profileImage,
     required this.userName,
     required this.email,
@@ -21,6 +24,16 @@ class FindEventsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+
+    // Decode Base64 string to Uint8List if necessary
+    Uint8List? decodedImage;
+    if (profileImage.isNotEmpty && profileImage.startsWith('data:image')) {
+      try {
+        decodedImage = base64Decode(profileImage.split(',').last);
+      } catch (e) {
+        print('Error decoding Base64 image: $e');
+      }
+    }
 
     return Scaffold(
       key: _scaffoldKey,
@@ -183,11 +196,12 @@ class FindEventsPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => HomePage(
-                          userName: userName,
-                          profileImage: profileImage,
-                          email: email,
-                        )), // Ensure HomePage is properly implemented
+                  builder: (context) => HomePage(
+                    profileImage: profileImage,
+                    userName: userName,
+                    email: email,
+                  ),
+                ),
               );
             },
           ),
@@ -195,7 +209,7 @@ class FindEventsPage extends StatelessWidget {
             leading: Icon(Icons.event, color: Colors.green[900]),
             title: Text('Find Events', style: TextStyle(color: Colors.green[900])),
             onTap: () {
-              Navigator.pop(context);
+              Navigator.pop(context); // Close the drawer
             },
           ),
           ListTile(
@@ -205,11 +219,12 @@ class FindEventsPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => MyProfilePage(
-                          profileImage: profileImage,
-                          userName: userName,
-                          email: email,
-                        )),
+                  builder: (context) => MyProfilePage(
+                    profileImage: profileImage,
+                    userName: userName,
+                    email: email,
+                  ),
+                ),
               );
             },
           ),
@@ -219,7 +234,13 @@ class FindEventsPage extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SettingsPage()),
+                MaterialPageRoute(
+                  builder: (context) => SettingsPage(
+                    profileImage: profileImage,
+                    userName: userName,
+                    email: email,
+                  ),
+                ),
               );
             },
           ),
@@ -257,7 +278,9 @@ class FindEventsPage extends StatelessWidget {
           ],
         ),
         isThreeLine: true,
-        onTap: () {},
+        onTap: () {
+          // Optional: Add navigation or other action on tap
+        },
       ),
     );
   }

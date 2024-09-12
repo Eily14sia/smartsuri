@@ -1,9 +1,13 @@
-//VERIFICATON PARA SA FORGOT PASSWORD
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'create_new_password_page.dart'; // Import the create new password page
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class VerificationCodePage extends StatefulWidget {
-  const VerificationCodePage({super.key});
+  final String token;
+
+  const VerificationCodePage({super.key, required this.token}); // Token passed in constructor
 
   @override
   _VerificationCodePageState createState() => _VerificationCodePageState();
@@ -11,13 +15,114 @@ class VerificationCodePage extends StatefulWidget {
 
 class _VerificationCodePageState extends State<VerificationCodePage> {
   final TextEditingController codeController = TextEditingController();
+  bool isLoading = false;
+  String errorMessage = '';
+  String? newToken; // Variable to hold the new token
 
-  void _verifyCode() {
-    // Logic to verify the code goes here
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const CreateNewPasswordPage()),
-    );
+  Future<void> _verifyCode() async {
+    final String code = codeController.text;
+    final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from .env file
+
+    if (code.isEmpty) {
+      setState(() {
+        errorMessage = "Please enter the verification code";
+      });
+      return;
+    }
+
+    if (apiUrl.isNotEmpty) {
+      setState(() {
+        isLoading = true;
+        errorMessage = '';
+      });
+
+      try {
+        // API call to verifyPass endpoint
+        var response = await http.post(
+          Uri.parse('$apiUrl/auth/verifyPass'), // Change to correct endpoint
+          headers: {"Content-Type": "application/json"},
+          body: json.encode({
+            'token': newToken ?? widget.token, // Use the new token if available
+            'code': code,          // Code inputted by user
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          // If verification is successful, proceed to create a new password
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CreateNewPasswordPage(token: newToken ?? widget.token),
+            ),
+          );
+        } else {
+          // Handle error from API response
+          setState(() {
+            errorMessage = 'Invalid code. Please try again.';
+          });
+        }
+      } catch (e) {
+        setState(() {
+          errorMessage = 'An error occurred: $e';
+        });
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } else {
+      setState(() {
+        errorMessage = 'API URL is missing or incorrect.';
+      });
+    }
+  }
+
+  Future<void> _resendVerificationCode() async {
+    final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from .env file
+
+    if (apiUrl.isNotEmpty) {
+      setState(() {
+        isLoading = true;
+        errorMessage = '';
+      });
+
+      try {
+        // API call to resendPassCode endpoint
+        var response = await http.post(
+          Uri.parse('$apiUrl/auth/resendPassCode'), // Change to correct endpoint
+          headers: {"Content-Type": "application/json"},
+          body: json.encode({
+            'token': widget.token, 
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          // Parse the response to get the new token
+          var responseBody = json.decode(response.body);
+          setState(() {
+            newToken = responseBody['token']; // Set the new token
+            errorMessage = 'Verification code has been resent to your email.';
+          });
+        } else {
+          // Handle error from API response
+          setState(() {
+            errorMessage = 'Failed to resend verification code.';
+          });
+        }
+      } catch (e) {
+        setState(() {
+          errorMessage = 'An error occurred: $e';
+        });
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } else {
+      setState(() {
+        errorMessage = 'API URL is missing or incorrect.';
+      });
+    }
   }
 
   @override
@@ -33,11 +138,10 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
           },
         ),
       ),
-      body: Center(  // Centering the layout
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Checkmark symbol at the top
             Container(
               height: 80,
               width: 80,
@@ -48,7 +152,6 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
               child: const Icon(Icons.verified, size: 50, color: Colors.green),
             ),
             const SizedBox(height: 20),
-            // Verification Code Title
             Text(
               'Verification Code',
               style: TextStyle(
@@ -58,7 +161,6 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
               ),
             ),
             const SizedBox(height: 10),
-            // Instructions text
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 30.0),
               child: Text(
@@ -68,7 +170,6 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
               ),
             ),
             const SizedBox(height: 30),
-            // Code input field
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30.0),
               child: TextField(
@@ -89,6 +190,15 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
               ),
             ),
             const SizedBox(height: 30),
+            if (errorMessage.isNotEmpty) // Display error message if any
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                child: Text(
+                  errorMessage,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            const SizedBox(height: 10),
             // Verify Button
             ElevatedButton(
               onPressed: _verifyCode,
@@ -99,14 +209,13 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
                 ),
                 backgroundColor: Colors.green[900]!,
               ),
-              child: const Text('Verify', style: TextStyle(color: Colors.white)),
+              child: isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Verify', style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(height: 20),
-            // Resend verification code text
             TextButton(
-              onPressed: () {
-                // Logic to resend verification code
-              },
+              onPressed: _resendVerificationCode,
               child: Text(
                 'Send verification code again',
                 style: TextStyle(color: Colors.green[900]!),

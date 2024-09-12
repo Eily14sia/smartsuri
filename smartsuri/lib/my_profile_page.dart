@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date formatting
+import 'dart:typed_data';
+import 'dart:convert'; // Import to use base64Decode
 
 class MyProfilePage extends StatelessWidget {
   final String profileImage;
@@ -7,16 +9,27 @@ class MyProfilePage extends StatelessWidget {
   final String email;
   final DateTime now = DateTime.now(); // Current date to compare with event dates
 
-  MyProfilePage({super.key, 
-    this.profileImage = "https://via.placeholder.com/150", // Default placeholder image if none is provided
-    this.userName = "YourUserName", // Default username if none is provided
-    this.email = "sampleemail@gmail.com", // Default sample email if none is provided
+  MyProfilePage({
+    super.key,
+    required this.profileImage,
+    required this.userName,
+    required this.email,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Decode Base64 string to Uint8List
+    Uint8List? decodedImage;
+    if (profileImage.isNotEmpty) {
+      try {
+        decodedImage = base64Decode(profileImage);
+      } catch (e) {
+        print('Error decoding Base64 image: $e');
+      }
+    }
+
     return Scaffold(
-      body: SingleChildScrollView( // Make sure the page is scrollable
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0), // Add padding to the entire page
           child: Column(
@@ -41,38 +54,40 @@ class MyProfilePage extends StatelessWidget {
                   ),
                 ],
               ),
-              
-              // Profile Section (Adjusted to match the SettingsPage layout)
-              const SizedBox(height: 20), // Add space between header and profile
+
+              // Profile Section
+              const SizedBox(height: 20),
               Center(
                 child: Column(
                   children: [
                     CircleAvatar(
-                      radius: 50, // Adjusted size to match SettingsPage
-                      backgroundImage: NetworkImage(profileImage), // Dynamic profile image or default placeholder
-                      backgroundColor: Colors.green[200], // Placeholder background color
+                      radius: 50,
+                      backgroundImage: decodedImage != null
+                        ? MemoryImage(decodedImage!) // Display decoded Base64 image
+                        : AssetImage('assets/profile1.png') as ImageProvider, // Placeholder image if decoding fails
+                      backgroundColor: Colors.green[200],
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      userName, // Dynamic user name or default
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Adjusted to match SettingsPage
+                      userName,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 5), // Add space between username and email
+                    const SizedBox(height: 5),
                     Text(
-                      email, // Dynamic or sample email
+                      email,
                       style: const TextStyle(
-                        fontSize: 16, // Adjusted to match SettingsPage
-                        color: Colors.black, // Black color
-                        fontWeight: FontWeight.normal, // Ensure it's not bold
+                        fontSize: 16,
+                        color: Colors.black,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 30), // More space after the profile section
+              const SizedBox(height: 30),
 
-              // My Scan History Section with Green Background and Closer Spacing
+              // My Scan History Section
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
@@ -80,9 +95,9 @@ class MyProfilePage extends StatelessWidget {
                 child: Text(
                   'My Scan History:',
                   style: TextStyle(
-                    fontSize: 16, // Slightly smaller font size for the section title
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green[900], // Dark green text color
+                    color: Colors.green[900],
                   ),
                 ),
               ),
@@ -109,10 +124,9 @@ class MyProfilePage extends StatelessWidget {
                 },
               ),
 
-              // Closer Spacing Between Sections
-              const SizedBox(height: 15), // Reduce space between "Non-Recyclable" and "My Events"
+              const SizedBox(height: 15),
 
-              // My Events Section with Green Background
+              // My Events Section
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
@@ -120,9 +134,9 @@ class MyProfilePage extends StatelessWidget {
                 child: Text(
                   'My Events:',
                   style: TextStyle(
-                    fontSize: 16, // Slightly smaller font size for the section title
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green[900], // Dark green text color
+                    color: Colors.green[900],
                   ),
                 ),
               ),
@@ -131,7 +145,6 @@ class MyProfilePage extends StatelessWidget {
                 'Plastic Clearing Project',
                 'August 19, 2024, 10:00 AM',
                 'San Juan City',
-                now,
                 Icons.recycling,
                 past: false,
               ),
@@ -140,14 +153,13 @@ class MyProfilePage extends StatelessWidget {
                 'Sample Event',
                 'August 18, 2024, 10:00 AM',
                 'Manila City',
-                now,
                 Icons.recycling,
                 past: false,
               ),
 
               const SizedBox(height: 20),
 
-              // Events History Section with Green Background
+              // Events History Section
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
@@ -155,9 +167,9 @@ class MyProfilePage extends StatelessWidget {
                 child: Text(
                   'Events History:',
                   style: TextStyle(
-                    fontSize: 16, // Slightly smaller font size for the section title
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green[900], // Dark green text color
+                    color: Colors.green[900],
                   ),
                 ),
               ),
@@ -166,7 +178,6 @@ class MyProfilePage extends StatelessWidget {
                 'Beach Cleanup',
                 'July 10, 2024, 9:00 AM',
                 'Davao City',
-                now,
                 Icons.history,
                 past: true,
               ),
@@ -175,7 +186,6 @@ class MyProfilePage extends StatelessWidget {
                 'Tree Planting Activity',
                 'June 5, 2024, 7:30 AM',
                 'Cebu City',
-                now,
                 Icons.history,
                 past: true,
               ),
@@ -187,18 +197,17 @@ class MyProfilePage extends StatelessWidget {
   }
 
   // Helper function to build event tiles
-  Widget _buildEventTile(BuildContext context, String title, String date, String location, DateTime now, IconData icon, {required bool past}) {
-    DateTime eventDate = DateFormat('MMMM d, yyyy, hh:mm a').parse(date);
-    // ignore: unused_local_variable
+  Widget _buildEventTile(BuildContext context, String title, String date, String location, IconData icon, {required bool past}) {
+    DateTime eventDate = DateFormat('MMMM d, yyyy, h:mm a').parse(date);
     bool isPast = eventDate.isBefore(now);
 
     return ListTile(
       leading: Icon(
         icon,
-        color: Colors.green[900], // Matching color with recyclable icon
+        color: Colors.green[900],
       ),
-      title: Text(title, style: const TextStyle(fontSize: 16)), // Consistent font size for event title
-      subtitle: Text('$date\n$location', style: const TextStyle(fontSize: 14)), // Slightly smaller font size for subtitle
+      title: Text(title, style: const TextStyle(fontSize: 16)),
+      subtitle: Text('$date\n$location', style: const TextStyle(fontSize: 14)),
       isThreeLine: true,
     );
   }

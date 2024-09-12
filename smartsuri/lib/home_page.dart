@@ -1,9 +1,13 @@
+import 'dart:convert'; // Import to use base64Decode
+import 'dart:typed_data'; // Import to use Uint8List
 import 'package:flutter/material.dart';
 import 'scan_page.dart'; // Import the ScanPage
 import 'find_events_page.dart'; // Import the FindEventsPage
 import 'my_profile_page.dart'; // Import the MyProfilePage
 import 'settings_page.dart'; // Import the SettingsPage
 import 'browse_more_page.dart'; // Import the BrowseMorePage
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class HomePage extends StatelessWidget {
   final String profileImage;
@@ -12,10 +16,25 @@ class HomePage extends StatelessWidget {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  HomePage({super.key, required this.profileImage, required this.userName, required this.email});
+  HomePage({super.key, required this.profileImage, required this.userName, required this.email,});
+
+  Future<String?> getAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('access_token');
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Decode Base64 string to Uint8List
+    Uint8List? decodedImage;
+    if (profileImage.isNotEmpty) {
+      try {
+        decodedImage = base64Decode(profileImage);
+      } catch (e) {
+        print('Error decoding Base64 image: $e');
+      }
+    }
+
     return Scaffold(
       key: _scaffoldKey,
       endDrawer: Drawer(
@@ -79,7 +98,11 @@ class HomePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SettingsPage()),
+                  MaterialPageRoute(builder: (context) => SettingsPage(
+                            profileImage: profileImage,
+                            userName: userName,
+                            email: email,
+                  )),
                 );
               },
             ),
@@ -100,9 +123,19 @@ class HomePage extends StatelessWidget {
                       CircleAvatar(
                         radius: 20,
                         backgroundColor: Colors.green[900],
-                        child: const Icon(
+                        child: decodedImage != null
+                            ? ClipOval(
+                          child: Image.memory(
+                            decodedImage,
+                            fit: BoxFit.cover,
+                            width: 40,
+                            height: 40,
+                          ),
+                        )
+                      : const Icon(
                           Icons.person,
                           color: Colors.white,
+                          size: 40,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -292,28 +325,48 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget buildInnovationCard(String title, String subtitle, String imageUrl) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
+  Widget buildInnovationCard(String title, String description, String imageUrl) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.green[100],
         borderRadius: BorderRadius.circular(10),
       ),
-      child: ListTile(
-        leading: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: Colors.green[100],
-            borderRadius: BorderRadius.circular(5),
-            image: DecorationImage(
-              image: NetworkImage(imageUrl),
+      child: Row(
+        children: [
+          Expanded(
+            child: Image.network(
+              imageUrl,
               fit: BoxFit.cover,
+              height: 80,
+              width: 80,
             ),
           ),
-        ),
-        title: Text(title),
-        subtitle: Text(subtitle),
-        trailing: const Icon(Icons.arrow_forward_ios),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green[900],
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -327,6 +380,9 @@ class DetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Item $itemIndex Details'),
+      ),
       body: Center(
         child: Text('Details for item $itemIndex'),
       ),
@@ -342,8 +398,11 @@ class InnovationDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('$innovation Details'),
+      ),
       body: Center(
-        child: Text('Details about $innovation'),
+        child: Text('Details for $innovation'),
       ),
     );
   }

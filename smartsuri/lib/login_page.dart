@@ -34,28 +34,35 @@ class _LoginPageState extends State<LoginPage> {
           }),
         );
 
-        if (response.statusCode == 200) {
-          // Handle successful login
-          var jsonResponse = json.decode(response.body);
-          print('Login successful: $jsonResponse');
-          // Navigate to VerificationPage with email and dummy profile data
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => VerificationPage(
-                profileImage: 'assets/default_profile.png', // Pass default or selected profile image
-                userName: 'YourUserName', // Pass user's name
-                email: email, // Pass email from the input
-              ),
+         if (response.statusCode == 200) {
+        // Handle successful login
+        var jsonResponse = json.decode(response.body);
+        print('Login successful: $jsonResponse');
+
+        // Navigate to VerificationPage with email and dummy profile data
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VerificationPage(
+              profileImage: 'assets/default_profile.png', // Pass default or selected profile image
+              userName: 'YourUserName', // Pass user's name
+              email: email, // Pass email from the input
             ),
-          );
-        } else {
-          print('Login failed with status: ${response.statusCode}');
-          // Show error message to user (optional)
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login failed with status: ${response.statusCode}')),
-          );
-        }
+          ),
+        );
+      } else if (response.statusCode == 401) {
+        // Handle unauthorized error
+        print('Login failed with status: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid email or password. Please try again.')),
+        );
+      } else {
+        // Handle other errors
+        print('Login failed with status: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed with status: ${response.statusCode}')),
+        );
+      }
       } catch (e) {
         print('Error: $e');
         // Show error message to user (optional)

@@ -5,13 +5,20 @@ import 'dart:io';
 import 'find_events_page.dart';
 import 'my_profile_page.dart';
 import 'settings_page.dart';
+import 'dart:typed_data';
+import 'dart:convert'; // Import to use base64Decode
 
 class ScanPage extends StatefulWidget {
   final String profileImage;
   final String userName;
   final String email;
 
-  const ScanPage({super.key, required this.profileImage, required this.userName, required this.email});
+  const ScanPage({
+    super.key,
+    required this.profileImage,
+    required this.userName,
+    required this.email,
+  });
 
   @override
   _ScanPageState createState() => _ScanPageState();
@@ -61,11 +68,22 @@ class _ScanPageState extends State<ScanPage> {
     final directory = await getApplicationDocumentsDirectory();
     final String path = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.png';
     final File newImage = File(path);
-    return newImage.writeAsBytes(await image.readAsBytes()).then((_) => path);
+    await newImage.writeAsBytes(await image.readAsBytes());
+    return path;
   }
 
   @override
   Widget build(BuildContext context) {
+    // Decode Base64 string to Uint8List (if needed for further processing)
+    Uint8List? decodedImage;
+    if (widget.profileImage.isNotEmpty) {
+      try {
+        decodedImage = base64Decode(widget.profileImage);
+      } catch (e) {
+        print('Error decoding Base64 image: $e');
+      }
+    }
+
     final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -203,11 +221,12 @@ class _ScanPageState extends State<ScanPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => FindEventsPage(
-                          profileImage: widget.profileImage,
-                          userName: widget.userName,
-                          email: widget.email,
-                        )),
+                  builder: (context) => FindEventsPage(
+                    profileImage: widget.profileImage,
+                    userName: widget.userName,
+                    email: widget.email,
+                  ),
+                ),
               );
             },
           ),
@@ -218,11 +237,12 @@ class _ScanPageState extends State<ScanPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => MyProfilePage(
-                          profileImage: widget.profileImage,
-                          userName: widget.userName,
-                          email: widget.email,
-                        )),
+                  builder: (context) => MyProfilePage(
+                    profileImage: widget.profileImage,
+                    userName: widget.userName,
+                    email: widget.email,
+                  ),
+                ),
               );
             },
           ),
@@ -232,7 +252,13 @@ class _ScanPageState extends State<ScanPage> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SettingsPage()),
+                MaterialPageRoute(
+                  builder: (context) => SettingsPage(
+                    profileImage: widget.profileImage,
+                    userName: widget.userName,
+                    email: widget.email,
+                  ),
+                ),
               );
             },
           ),

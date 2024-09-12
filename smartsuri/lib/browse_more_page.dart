@@ -1,5 +1,7 @@
-import 'dart:html' as html;
+import 'dart:typed_data';
+import 'dart:convert'; // Import to use base64Decode
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart'; // For launching URLs in mobile apps
 import 'scan_page.dart';
 
 class BrowseMorePage extends StatelessWidget {
@@ -42,6 +44,16 @@ class BrowseMorePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Decode Base64 string to Uint8List
+    Uint8List? decodedImage;
+    if (profileImage.isNotEmpty) {
+      try {
+        decodedImage = base64Decode(profileImage);
+      } catch (e) {
+        print('Error decoding Base64 image: $e');
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Best Innovation'),
@@ -76,8 +88,13 @@ class BrowseMorePage extends StatelessWidget {
                       subtitle: Text(recyclingIdeas[index]['description']!),
                       trailing: IconButton(
                         icon: const Icon(Icons.link, color: Colors.green),
-                        onPressed: () {
-                          html.window.open(recyclingIdeas[index]['url']!, '_blank');
+                        onPressed: () async {
+                          final url = recyclingIdeas[index]['url']!;
+                          if (await canLaunch(url)) {
+                            await launch(url);
+                          } else {
+                            throw 'Could not launch $url';
+                          }
                         },
                       ),
                     ),

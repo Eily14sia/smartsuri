@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'home_page.dart'; // Assuming HomePage is where you navigate after verification
+import 'home_page.dart'; 
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class VerificationPage extends StatelessWidget {
   final String email;
@@ -16,42 +18,53 @@ class VerificationPage extends StatelessWidget {
     required this.userName,
   });
 
-  Future<void> verifyCode(BuildContext context, String code) async {
-    final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+Future<void> verifyCode(BuildContext context, String code) async {
+  final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
 
-    try {
-      final response = await http.post(
-        Uri.parse('$apiUrl/auth/verifCode'), // Correct URL
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'code': code}),
-      );
+  try {
+    final response = await http.post(
+      Uri.parse('$apiUrl/auth/verifCode'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'code': code}),
+    );
 
-      if (response.statusCode == 200) {
-        // Handle success
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(
-              userName: userName,
-              profileImage: profileImage,
-              email: email,
-            ),
+    if (response.statusCode == 200) {
+      // Decode the response
+      final responseBody = jsonDecode(response.body);
+
+      // Extract data
+      final accessToken = responseBody['access_token']['accessToken'];
+      final userInfo = responseBody['userinfo'];
+
+      // Store the access token in shared preferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('access_token', accessToken);
+
+      // Navigate to HomePage with the response data
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(
+            userName: userInfo['username'],
+            profileImage: userInfo['prof_img'], // Use default or update as needed
+            email: userInfo['email'],
           ),
-        );
-      } else {
-        // Handle error
-        final responseBody = jsonDecode(response.body);
-        final errorMessage = responseBody['errorMessage'] ?? 'Invalid verification code';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
-        );
-      }
-    } catch (error) {
+        ),
+      );
+    } else {
+      // Handle error
+      final responseBody = jsonDecode(response.body);
+      final errorMessage = responseBody['errorMessage'] ?? 'Invalid verification code';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: $error')),
+        SnackBar(content: Text(errorMessage)),
       );
     }
+  } catch (error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('An error occurred: $error')),
+    );
   }
+}
 
   Future<void> resendVerificationCode(BuildContext context) async {
     final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file

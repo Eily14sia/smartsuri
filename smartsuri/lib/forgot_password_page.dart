@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'verification_code_page.dart'; // Import the verification code page
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import flutter_dotenv
+import 'dart:convert'; // For JSON encoding
+import 'package:http/http.dart' as http;
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -10,15 +13,69 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController emailController = TextEditingController();
+  bool isLoading = false;
+  String errorMessage = '';
 
-  void _sendVerificationCode() {
-    // Logic to send the verification code goes here
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const VerificationCodePage()),
-    );
+ Future<void> _sendVerificationCode() async {
+    final String email = emailController.text;
+    final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from .env file
+
+    if (email.isEmpty) {
+      setState(() {
+        errorMessage = "Please enter your email";
+      });
+      return;
+    }
+
+    if (apiUrl.isNotEmpty) {
+      setState(() {
+        isLoading = true;
+        errorMessage = '';
+      });
+
+      try {
+        var response = await http.post(
+          Uri.parse('$apiUrl/auth/forgetPass'), // Append endpoint
+          headers: {"Content-Type": "application/json"},
+          body: json.encode({
+            'email': email, // Send email as part of the body
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          // Parse the response body and extract the token
+          var responseBody = json.decode(response.body);
+          String token = responseBody['token']; // Assuming token is in the response
+
+          // Navigate to the next page and pass the token
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VerificationCodePage(token: token), // Pass the token
+            ),
+          );
+        } else {
+          // Handle error response
+          setState(() {
+            errorMessage = 'Failed to send verification code. Try again.';
+          });
+        }
+      } catch (e) {
+        setState(() {
+          errorMessage = 'Error occurred: $e';
+        });
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } else {
+      setState(() {
+        errorMessage = 'API URL is missing or incorrect.';
+      });
+    }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
