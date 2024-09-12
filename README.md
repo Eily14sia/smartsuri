@@ -8,16 +8,16 @@ to run both projects
    - flutter run -d chrome
   
 4. to run backend type in console (open separate console in vs code)
-   -cd smartsuri_backend
-   -npm install
-   -npm start
+   - cd smartsuri_backend
+   - npm install
+   - npm start
 
 5. make sure xampp (Apache and MySQL) is running and installed.
    
 6. To migrate database (in backend directory)
-  -open first phpmyAdmin via Xampp terminal in MYSQL
-  -create a new database name (smartsuri)
-  -then follow these steps in vs code
+  - open first phpmyAdmin via Xampp terminal in MYSQL
+  - create a new database name (smartsuri)
+  - then follow these steps in vs code
   - cd smartsuri_backend
   - npx sequelize db:migrate
   - npx sequelize db:seed:all
