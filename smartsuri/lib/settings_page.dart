@@ -86,12 +86,12 @@ class _SettingsPageState extends State<SettingsPage> {
                     const SizedBox(height: 10),
                     Text(
                       widget.userName, // Dynamic user name
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       widget.email, // Dynamic email
-                      style: TextStyle(fontSize: 14, color: Colors.black),
+                      style: const TextStyle(fontSize: 14, color: Colors.black),
                     ),
                   ],
                 ),
@@ -101,22 +101,22 @@ class _SettingsPageState extends State<SettingsPage> {
 
               // General Settings Section with Green Background
               _buildSectionHeader('General Settings'),
-              _buildSettingsTile('Change Username', Icons.person, context, _showChangeUsernameDialog),
-              _buildSettingsTile('Change Email', Icons.email, context, _showChangeEmailDialog),
-              _buildSettingsTile('Change Profile Information', Icons.info, context, _showChangeProfileInfoDialog),
-              _buildSettingsTile('Change Password', Icons.lock, context, _showChangePasswordDialog),
+              _buildSettingsTile('Change Username', Icons.person, _showChangeUsernameDialog),
+              _buildSettingsTile('Change Email', Icons.email, _showChangeEmailDialog),
+              _buildSettingsTile('Change Profile Information', Icons.info, _showChangeProfileInfoDialog),
+              _buildSettingsTile('Change Password', Icons.lock, _showChangePasswordDialog),
 
               const SizedBox(height: 15),
 
               // Information Section with Green Background
               _buildSectionHeader('Information'),
-              _buildSettingsTile('About App', Icons.info_outline, context, () {
+              _buildSettingsTile('About App', Icons.info_outline, () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutUsPage()));
               }),
-              _buildSettingsTile('Terms & Conditions', Icons.article_outlined, context, () {
+              _buildSettingsTile('Terms & Conditions', Icons.article_outlined, () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const TermsConditionsPage()));
               }),
-              _buildSettingsTile('Privacy Policy', Icons.privacy_tip_outlined, context, () {
+              _buildSettingsTile('Privacy Policy', Icons.privacy_tip_outlined, () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyPolicyPage()));
               }),
 
@@ -171,7 +171,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   // Helper method to build settings tiles
-  Widget _buildSettingsTile(String title, IconData icon, BuildContext context, Function onTap) {
+  Widget _buildSettingsTile(String title, IconData icon, Function onTap) {
     return ListTile(
       leading: Icon(icon, color: Colors.green[900]), // Green icon color
       title: Text(title),
@@ -317,7 +317,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return TextField(
       obscureText: isPassword,
       decoration: InputDecoration(
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
         hintText: hint,
       ),
     );
@@ -327,10 +327,10 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildBirthdayField() {
     return TextField(
       decoration: InputDecoration(
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
         hintText: 'Enter your birthday',
         suffixIcon: IconButton(
-          icon: Icon(Icons.calendar_today),
+          icon: const Icon(Icons.calendar_today),
           onPressed: () {
             // Add date picker logic
           },
@@ -342,7 +342,7 @@ class _SettingsPageState extends State<SettingsPage> {
   // Create city dropdown
   Widget _buildCityDropdown() {
     return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         border: OutlineInputBorder(),
         hintText: 'Select your city',
       ),

@@ -7,13 +7,13 @@ import 'dart:convert';
 class VerifyEmailPage extends StatelessWidget {
   final String email;  // Declare email as a final field
 
-  const VerifyEmailPage({Key? key, required this.email}) : super(key: key);  // Initialize email in the constructor
+  const VerifyEmailPage({super.key, required this.email});  // Initialize email in the constructor
 
   @override
   Widget build(BuildContext context) {
     final TextEditingController codeController = TextEditingController();
 
-    Future<void> _verifyEmail() async {
+    Future<void> verifyEmail() async {
       final String code = codeController.text;
       final String apiUrl = dotenv.env['API_URL'] ?? '';  // Get API URL from env file
 
@@ -60,7 +60,7 @@ class VerifyEmailPage extends StatelessWidget {
       }
     }
 
-     Future<void> _resendVerificationCode() async {
+     Future<void> resendVerificationCode() async {
     final String apiUrl = dotenv.env['API_URL'] ?? '';  // Get API URL from env file
 
     if (apiUrl.isEmpty) {
@@ -178,7 +178,7 @@ class VerifyEmailPage extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     // Call _verifyEmail when button is pressed
-                    _verifyEmail();
+                    verifyEmail();
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
@@ -197,7 +197,7 @@ class VerifyEmailPage extends StatelessWidget {
                  TextButton(
                   onPressed: () {
                     // Call _resendVerificationCode when button is pressed
-                    _resendVerificationCode();
+                    resendVerificationCode();
                   },
                   child: Text(
                     'Resend Code?',

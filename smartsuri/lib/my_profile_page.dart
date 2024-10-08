@@ -63,8 +63,8 @@ class MyProfilePage extends StatelessWidget {
                     CircleAvatar(
                       radius: 50,
                       backgroundImage: decodedImage != null
-                        ? MemoryImage(decodedImage!) // Display decoded Base64 image
-                        : AssetImage('assets/profile1.png') as ImageProvider, // Placeholder image if decoding fails
+                        ? MemoryImage(decodedImage) // Display decoded Base64 image
+                        : const AssetImage('assets/profile1.png') as ImageProvider, // Placeholder image if decoding fails
                       backgroundColor: Colors.green[200],
                     ),
                     const SizedBox(height: 10),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'forgot_password_page.dart';
 import 'verification_page.dart';
 import 'sign_up_page.dart'; // Import the sign-up page
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -74,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
       print('API URL not found');
       // Show error message to user (optional)
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('API URL not found')),
+        const SnackBar(content: Text('API URL not found')),
       );
     }
   }

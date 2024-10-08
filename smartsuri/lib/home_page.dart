@@ -6,6 +6,7 @@ import 'find_events_page.dart'; // Import the FindEventsPage
 import 'my_profile_page.dart'; // Import the MyProfilePage
 import 'settings_page.dart'; // Import the SettingsPage
 import 'browse_more_page.dart'; // Import the BrowseMorePage
+import 'recommendation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -77,6 +78,18 @@ class HomePage extends StatelessWidget {
                 );
               },
             ),
+            ListTile(
+  leading: Icon(Icons.recommend, color: Colors.green[900]),
+  title: Text('Recommendations', style: TextStyle(color: Colors.green[900])),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RecommendationPage(
+             
+      )),
+    );
+  },
+),
             ListTile(
               leading: Icon(Icons.person, color: Colors.green[900]),
               title: Text('My Profile', style: TextStyle(color: Colors.green[900])),

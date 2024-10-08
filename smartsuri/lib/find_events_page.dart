@@ -1,39 +1,49 @@
 import 'package:flutter/material.dart';
 import 'recent_events_page.dart';
 import 'events_button.dart'; // Import the EventsButtonPage
+import 'add_event_page.dart'; // Import the AddEventPage
 import 'my_profile_page.dart'; // Import MyProfilePage
 import 'settings_page.dart'; // Import SettingsPage
 import 'home_page.dart'; // Import HomePage
-import 'dart:typed_data';
-import 'dart:convert'; // Import to use base64Decode
 
-class FindEventsPage extends StatelessWidget {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
+class FindEventsPage extends StatefulWidget {
   final String profileImage;
   final String userName;
   final String email;
 
-  FindEventsPage({
-    super.key,
+  const FindEventsPage({super.key, 
     required this.profileImage,
     required this.userName,
     required this.email,
   });
 
   @override
+  _FindEventsPageState createState() => _FindEventsPageState();
+}
+
+class _FindEventsPageState extends State<FindEventsPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  String selectedCity = 'All Cities';
+
+  List<Map<String, String>> events = [
+    {
+      'title': 'Eco-bridge Recycling Project',
+      'date': 'July 22, 2024',
+      'location': 'San Juan City',
+    },
+    {
+      'title': 'Recyclable Plastic Boats',
+      'date': 'February 24, 2024',
+      'location': 'Manila City',
+    },
+    // Add more events as needed
+  ];
+
+  @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-
-    // Decode Base64 string to Uint8List if necessary
-    Uint8List? decodedImage;
-    if (profileImage.isNotEmpty && profileImage.startsWith('data:image')) {
-      try {
-        decodedImage = base64Decode(profileImage.split(',').last);
-      } catch (e) {
-        print('Error decoding Base64 image: $e');
-      }
-    }
+    const buttonWidth = 250.0; // Adjust to match your button size
 
     return Scaffold(
       key: _scaffoldKey,
@@ -71,26 +81,116 @@ class FindEventsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const EventsButtonPage()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                          side: BorderSide(color: Colors.green[900]!, width: 2),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Find Events Button
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EventsButtonPage(
+                                  events: events, // Pass the actual list of events from FindEventsPage
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                              side: BorderSide(color: Colors.green[900]!, width: 2),
+                            ),
+                          ),
+                          child: Text(
+                            'Select Event',
+                            style: TextStyle(
+                              color: Colors.green[900]!,
+                            ),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        'Find Events',
-                        style: TextStyle(
-                          color: Colors.green[900]!,
+                        const SizedBox(width: 20),
+                        // Add Event Button
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AddEventPage(
+                                  onEventAdded: (newEvent) {
+                                    setState(() {
+                                      events.add(newEvent); // Add new event to list
+                                    });
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                              side: BorderSide(color: Colors.green[900]!, width: 2),
+                            ),
+                          ),
+                          child: Text(
+                            'Add Event',
+                            style: TextStyle(
+                              color: Colors.green[900]!,
+                            ),
+                          ),
                         ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Dropdown for City Filter
+                  Center(
+                    child: SizedBox(
+                      width: buttonWidth, // Set the dropdown width to match buttons
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                            borderSide: BorderSide(color: Colors.green[900]!, width: 2),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        value: selectedCity,
+                        items: [
+                          'All Cities',
+                          'Caloocan',
+                          'Las Piñas',
+                          'Makati',
+                          'Malabon',
+                          'Mandaluyong',
+                          'Manila',
+                          'Marikina',
+                          'Muntinlupa',
+                          'Navotas',
+                          'Parañaque',
+                          'Pasay',
+                          'Pasig',
+                          'Quezon City',
+                          'San Juan',
+                          'Taguig',
+                          'Valenzuela',
+                        ].map<DropdownMenuItem<String>>((String city) {
+                          return DropdownMenuItem<String>(
+                            value: city,
+                            child: Text(city),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedCity = newValue!;
+                          });
+                        },
                       ),
                     ),
                   ),
@@ -104,18 +204,8 @@ class FindEventsPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  _buildEventCard(
-                    'Eco-bridge Recycling Project',
-                    'July 22, 2024',
-                    'San Juan City',
-                    context,
-                  ),
-                  _buildEventCard(
-                    'Recyclable Plastic Boats',
-                    'February 24, 2024',
-                    'Manila City',
-                    context,
-                  ),
+                  // Filtered Event Cards
+                  ..._buildFilteredEvents(),
                   const SizedBox(height: 20),
                   Center(
                     child: ElevatedButton(
@@ -197,11 +287,11 @@ class FindEventsPage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => HomePage(
-                    profileImage: profileImage,
-                    userName: userName,
-                    email: email,
+                    userName: widget.userName,
+                    profileImage: widget.profileImage,
+                    email: widget.email,
                   ),
-                ),
+                ), // Ensure HomePage is properly implemented
               );
             },
           ),
@@ -209,7 +299,7 @@ class FindEventsPage extends StatelessWidget {
             leading: Icon(Icons.event, color: Colors.green[900]),
             title: Text('Find Events', style: TextStyle(color: Colors.green[900])),
             onTap: () {
-              Navigator.pop(context); // Close the drawer
+              Navigator.pop(context);
             },
           ),
           ListTile(
@@ -220,9 +310,9 @@ class FindEventsPage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => MyProfilePage(
-                    profileImage: profileImage,
-                    userName: userName,
-                    email: email,
+                    profileImage: widget.profileImage,
+                    userName: widget.userName,
+                    email: widget.email,
                   ),
                 ),
               );
@@ -236,9 +326,9 @@ class FindEventsPage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => SettingsPage(
-                    profileImage: profileImage,
-                    userName: userName,
-                    email: email,
+                    profileImage: widget.profileImage,
+                    userName: widget.userName,
+                    email: widget.email,
                   ),
                 ),
               );
@@ -247,6 +337,17 @@ class FindEventsPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  List<Widget> _buildFilteredEvents() {
+    // Filter events based on the selected city
+    List<Map<String, String>> filteredEvents = selectedCity == 'All Cities'
+        ? events
+        : events.where((event) => event['location']?.contains(selectedCity) ?? false).toList();
+
+    return filteredEvents.map((event) {
+      return _buildEventCard(event['title']!, event['date']!, event['location']!, context);
+    }).toList();
   }
 
   Widget _buildEventCard(String title, String date, String location, BuildContext context) {
@@ -278,9 +379,7 @@ class FindEventsPage extends StatelessWidget {
           ],
         ),
         isThreeLine: true,
-        onTap: () {
-          // Optional: Add navigation or other action on tap
-        },
+        onTap: () {},
       ),
     );
   }
