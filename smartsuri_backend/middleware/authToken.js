@@ -28,6 +28,9 @@ class AuthService {
         user: emailUser,
         pass: emailPass,
       },
+      tls: {
+        rejectUnauthorized: false
+      }
     });
   }
 

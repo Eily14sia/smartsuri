@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import 'dart:typed_data';
 import 'dart:convert'; // Import to use base64Decode
+import 'package:shared_preferences/shared_preferences.dart';
 
-class MyProfilePage extends StatelessWidget {
+class MyProfilePage extends StatefulWidget {
   final String profileImage;
   final String userName;
   final String email;
-  final DateTime now = DateTime.now(); // Current date to compare with event dates
 
   MyProfilePage({
     super.key,
@@ -17,12 +17,61 @@ class MyProfilePage extends StatelessWidget {
   });
 
   @override
+  _MyProfilePageState createState() => _MyProfilePageState();
+}
+
+class _MyProfilePageState extends State<MyProfilePage> {
+  final DateTime now = DateTime.now(); // Current date to compare with event dates
+  List<Map<String, String>> upcomingEvents = [];
+  List<Map<String, String>> pastEvents = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEventDetails();
+  }
+
+  Future<void> _loadEventDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keys = prefs.getKeys().where((key) => key.startsWith('event_'));
+    final uniqueEvents = <String>{};
+
+    for (var key in keys) {
+      final parts = key.split('_');
+      if (parts.length == 3) {
+        final id = parts[1];
+        final name = prefs.getString('event_${id}_name') ?? '';
+        final date = prefs.getString('event_${id}_date') ?? '';
+        final location = prefs.getString('event_${id}_location') ?? '';
+        final eventIdentifier = '$name|$date|$location';
+
+        if (!uniqueEvents.contains(eventIdentifier)) {
+          uniqueEvents.add(eventIdentifier);
+          final eventDate = DateTime.parse(date);
+          if (eventDate.isBefore(now)) {
+            pastEvents.add({'name': name, 'date': date, 'location': location});
+          } else {
+            upcomingEvents.add({'name': name, 'date': date, 'location': location});
+          }
+        }
+      }
+    }
+
+    setState(() {
+      // Trigger UI update
+    });
+
+    print('Loaded upcoming events: $upcomingEvents');
+    print('Loaded past events: $pastEvents');
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Decode Base64 string to Uint8List
     Uint8List? decodedImage;
-    if (profileImage.isNotEmpty) {
+    if (widget.profileImage.isNotEmpty) {
       try {
-        decodedImage = base64Decode(profileImage);
+        decodedImage = base64Decode(widget.profileImage);
       } catch (e) {
         print('Error decoding Base64 image: $e');
       }
@@ -69,12 +118,12 @@ class MyProfilePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      userName,
+                      widget.userName,
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      email,
+                      widget.email,
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.black,
@@ -140,22 +189,14 @@ class MyProfilePage extends StatelessWidget {
                   ),
                 ),
               ),
-              _buildEventTile(
+              ...upcomingEvents.map((event) => _buildEventTile(
                 context,
-                'Plastic Clearing Project',
-                'August 19, 2024, 10:00 AM',
-                'San Juan City',
+                event['name']!,
+                event['date']!,
+                event['location']!,
                 Icons.recycling,
                 past: false,
-              ),
-              _buildEventTile(
-                context,
-                'Sample Event',
-                'August 18, 2024, 10:00 AM',
-                'Manila City',
-                Icons.recycling,
-                past: false,
-              ),
+              )).toList(),
 
               const SizedBox(height: 20),
 
@@ -173,22 +214,14 @@ class MyProfilePage extends StatelessWidget {
                   ),
                 ),
               ),
-              _buildEventTile(
+              ...pastEvents.map((event) => _buildEventTile(
                 context,
-                'Beach Cleanup',
-                'July 10, 2024, 9:00 AM',
-                'Davao City',
+                event['name']!,
+                event['date']!,
+                event['location']!,
                 Icons.history,
                 past: true,
-              ),
-              _buildEventTile(
-                context,
-                'Tree Planting Activity',
-                'June 5, 2024, 7:30 AM',
-                'Cebu City',
-                Icons.history,
-                past: true,
-              ),
+              )).toList(),
             ],
           ),
         ),
@@ -198,7 +231,8 @@ class MyProfilePage extends StatelessWidget {
 
   // Helper function to build event tiles
   Widget _buildEventTile(BuildContext context, String title, String date, String location, IconData icon, {required bool past}) {
-    DateTime eventDate = DateFormat('MMMM d, yyyy, h:mm a').parse(date);
+    DateTime eventDate = DateTime.parse(date); // Parse ISO 8601 date string
+    String formattedDate = DateFormat('MMMM d, yyyy').format(eventDate); // Format to desired display format
     bool isPast = eventDate.isBefore(now);
 
     return ListTile(
@@ -207,7 +241,7 @@ class MyProfilePage extends StatelessWidget {
         color: Colors.green[900],
       ),
       title: Text(title, style: const TextStyle(fontSize: 16)),
-      subtitle: Text('$date\n$location', style: const TextStyle(fontSize: 14)),
+      subtitle: Text('$formattedDate\n$location', style: const TextStyle(fontSize: 14)),
       isThreeLine: true,
     );
   }

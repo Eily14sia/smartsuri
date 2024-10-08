@@ -2,6 +2,10 @@ const express = require('express')
 const router = express.Router()
 
 const EventController = require('../controller/eventController'); // Controller for User CRUD operations
+const AuthService = require('../middleware/authToken'); // Middleware
+
+// Middleware to authenticate token
+const authenticateToken = AuthService.authenticateToken;
 
 const multer = require('multer');
 
@@ -10,5 +14,7 @@ const upload = multer();
 
 router.post('/createEvent', upload.none(), EventController.createEvent);
 router.get('/getEvent', upload.none(), EventController.getEvent)
+router.post('/addEvent/:id', authenticateToken, upload.none(), EventController.getEventbyID);
+
 
 module.exports = router

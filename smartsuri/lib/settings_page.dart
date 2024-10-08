@@ -222,20 +222,33 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   // Change Email Dialog
-  void _showChangeEmailDialog() {
-    _showCustomDialog(
-      context,
-      title: 'Change Email',
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildCustomTextField('Enter new email'),
-          const SizedBox(height: 20),
-          _buildCustomTextField('Enter OTP'),
-        ],
-      ),
-    );
-  }
+void _showChangeEmailDialog() {
+  _showCustomDialog(
+    context,
+    title: 'Change Email',
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildCustomTextField('Enter new email'),
+            ),
+            const SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: () {
+                // Add your send OTP logic here
+              },
+              child: const Text('Send OTP'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        _buildCustomTextField('Enter OTP'),
+      ],
+    ),
+  );
+}
 
   // Change Profile Information Dialog
   void _showChangeProfileInfoDialog() {

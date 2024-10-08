@@ -33,3 +33,82 @@ notNull Violation: logmaster.isActive cannot be null
 2024-10-08T08:01:17.429Z [info] Events retrieved successfully 
 2024-10-08T08:01:41.584Z [info] Event created: hello 14 
 2024-10-08T08:01:42.668Z [info] Events retrieved successfully 
+2024-10-08T13:22:04.938Z [info] Events retrieved successfully 
+2024-10-08T13:50:38.129Z [info] Event retrieved successfully: Test Event 
+2024-10-08T13:51:13.729Z [info] Event retrieved successfully: Test Event 
+2024-10-08T13:56:37.663Z [info] Event retrieved successfully: Test Event 
+2024-10-08T14:02:34.998Z [info] Event retrieved successfully: Test Event 
+2024-10-08T14:02:35.001Z [error] Error getting event by ID: nodemailer is not defined {
+  "stack": "ReferenceError: nodemailer is not defined\n    at getEventbyID (C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\controller\\eventController.js:90:27)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)"
+}
+2024-10-08T14:03:31.660Z [info] Event retrieved successfully: Test Event 
+2024-10-08T14:04:02.189Z [error] Error getting event by ID: self-signed certificate in certificate chain {
+  "stack": "Error: self-signed certificate in certificate chain\n    at TLSSocket.onConnectSecure (node:_tls_wrap:1545:34)\n    at TLSSocket.emit (node:events:513:28)\n    at TLSSocket._finishInit (node:_tls_wrap:959:8)\n    at ssl.onhandshakedone (node:_tls_wrap:743:12)"
+}
+2024-10-08T14:04:27.134Z [info] Event retrieved successfully: Test Event 
+2024-10-08T14:05:00.221Z [error] Error getting event by ID: No recipients defined {
+  "stack": "Error: No recipients defined\n    at SMTPConnection._formatError (C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:807:19)\n    at SMTPConnection._setEnvelope (C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1045:34)\n    at SMTPConnection.send (C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:629:14)\n    at sendMessage (C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:228:28)\n    at C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:286:25\n    at SMTPConnection._actionAUTHComplete (C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1600:9)\n    at SMTPConnection.<anonymous> (C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:554:26)\n    at SMTPConnection._processResponse (C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:991:20)\n    at SMTPConnection._onData (C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:772:14)\n    at SMTPConnection._onSocketData (C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2024-10-08T14:06:36.243Z [info] Event retrieved successfully: Test Event 
+2024-10-08T14:06:36.251Z [error] Error getting event by ID: userEmail is not defined {
+  "stack": "ReferenceError: userEmail is not defined\n    at getEventbyID (C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\controller\\eventController.js:109:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)"
+}
+2024-10-08T14:06:56.268Z [info] Event retrieved successfully: Test Event 
+2024-10-08T14:07:29.621Z [error] Error getting event by ID: userEmail is not defined {
+  "stack": "ReferenceError: userEmail is not defined\n    at getEventbyID (C:\\Users\\eily\\Documents\\GitHub\\smartsuri\\smartsuri_backend\\controller\\eventController.js:116:36)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)"
+}
+2024-10-08T14:08:01.959Z [info] Event retrieved successfully: Test Event 
+2024-10-08T14:08:34.922Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Test Event 
+2024-10-08T14:09:27.652Z [info] Event created: Cedy Abnoy 
+2024-10-08T14:09:29.087Z [info] Events retrieved successfully 
+2024-10-08T14:12:29.322Z [info] Event created: HI 
+2024-10-08T14:12:30.690Z [info] Events retrieved successfully 
+2024-10-08T14:20:21.016Z [info] Events retrieved successfully 
+2024-10-08T14:20:40.040Z [info] Event created: 1 
+2024-10-08T14:20:41.604Z [info] Events retrieved successfully 
+2024-10-08T14:20:59.715Z [info] Event created: 2 
+2024-10-08T14:21:01.181Z [info] Events retrieved successfully 
+2024-10-08T14:21:14.245Z [info] Event created: 3 
+2024-10-08T14:21:15.742Z [info] Events retrieved successfully 
+2024-10-08T14:21:41.137Z [info] Event created: 4 
+2024-10-08T14:21:42.536Z [info] Events retrieved successfully 
+2024-10-08T14:21:54.204Z [info] Event created: 5 
+2024-10-08T14:21:55.777Z [info] Events retrieved successfully 
+2024-10-08T14:22:05.429Z [info] Event created: 6 
+2024-10-08T14:22:07.048Z [info] Events retrieved successfully 
+2024-10-08T14:22:24.236Z [info] Event created: 7 
+2024-10-08T14:22:25.657Z [info] Events retrieved successfully 
+2024-10-08T14:22:34.295Z [info] Event created: 8 
+2024-10-08T14:22:35.827Z [info] Events retrieved successfully 
+2024-10-08T14:31:52.393Z [info] Events retrieved successfully 
+2024-10-08T14:53:36.338Z [info] Events retrieved successfully 
+2024-10-08T14:57:16.282Z [info] Events retrieved successfully 
+2024-10-08T15:10:04.734Z [info] Events retrieved successfully 
+2024-10-08T15:16:49.352Z [info] Events retrieved successfully 
+2024-10-08T15:24:00.055Z [info] Events retrieved successfully 
+2024-10-08T15:24:03.143Z [info] Event retrieved successfully: Test Event 
+2024-10-08T15:24:05.491Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Test Event 
+2024-10-08T15:36:54.592Z [info] Events retrieved successfully 
+2024-10-08T15:37:05.460Z [info] Event retrieved successfully: Test Event 
+2024-10-08T15:37:07.915Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Test Event 
+2024-10-08T15:43:24.846Z [info] Events retrieved successfully 
+2024-10-08T15:43:31.280Z [info] Event retrieved successfully: Hello 
+2024-10-08T15:43:33.992Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Hello 
+2024-10-08T15:45:19.169Z [info] Event retrieved successfully: Test Event 
+2024-10-08T15:45:21.117Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Test Event 
+2024-10-08T15:51:51.178Z [info] Events retrieved successfully 
+2024-10-08T15:52:00.576Z [info] Event retrieved successfully: Hello 
+2024-10-08T15:52:03.194Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Hello 
+2024-10-08T15:57:33.313Z [info] Events retrieved successfully 
+2024-10-08T15:57:36.705Z [info] Event retrieved successfully: Test Event 
+2024-10-08T15:57:38.564Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Test Event 
+2024-10-08T15:58:51.409Z [info] Event retrieved successfully: Hello 
+2024-10-08T15:58:53.902Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Hello 
+2024-10-08T16:03:44.501Z [info] Events retrieved successfully 
+2024-10-08T16:03:48.700Z [info] Event retrieved successfully: 7 
+2024-10-08T16:03:50.749Z [info] Email sent to barveilyengco1214@gmail.com regarding event: 7 
+2024-10-08T16:15:12.473Z [info] Events retrieved successfully 
+2024-10-08T16:15:15.264Z [info] Event retrieved successfully: Test Event 
+2024-10-08T16:15:17.763Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Test Event 
+2024-10-08T16:15:26.795Z [info] Event retrieved successfully: Hello 
+2024-10-08T16:15:29.493Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Hello 

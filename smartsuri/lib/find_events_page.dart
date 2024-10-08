@@ -31,6 +31,7 @@ class _FindEventsPageState extends State<FindEventsPage> {
   String selectedCity = 'All Cities';
   List<Map<String, dynamic>> events = [];
   bool isLoading = true;
+  int itemsToShow = 10;
 
   @override
   void initState() {
@@ -50,6 +51,7 @@ class _FindEventsPageState extends State<FindEventsPage> {
           final List<dynamic> eventList = jsonResponse['events']; // Adjust this based on actual JSON structure
           setState(() {
             events = eventList.map((event) => {
+              'id': event['id'],
               'name': event['name'],
               'date': event['date'],
               'location': event['location'],
@@ -71,7 +73,7 @@ class _FindEventsPageState extends State<FindEventsPage> {
     } else {
       print('API URL not found');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('API URL not found')),
+        const SnackBar(content: Text('API URL not found')),
       );
     }
   }
@@ -242,17 +244,16 @@ class _FindEventsPageState extends State<FindEventsPage> {
                   const SizedBox(height: 10),
                   // Filtered Event Cards
                   if (isLoading)
-                    Center(child: CircularProgressIndicator())
+                    const Center(child: CircularProgressIndicator())
                   else
                     ..._buildFilteredEvents(),
                   const SizedBox(height: 20),
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const RecentEventsPage()),
-                        );
+                        setState(() {
+                          itemsToShow += 10;
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -384,7 +385,10 @@ class _FindEventsPageState extends State<FindEventsPage> {
         ? events
         : events.where((event) => event['location']?.contains(selectedCity) ?? false).toList();
 
-    return filteredEvents.map((event) {
+    // Limit the number of events to show
+    List<Map<String, dynamic>> eventsToDisplay = filteredEvents.take(itemsToShow).toList();
+
+    return eventsToDisplay.map((event) {
       return _buildEventCard(event['name']!, event['date']!, event['location']!, context);
     }).toList();
   }

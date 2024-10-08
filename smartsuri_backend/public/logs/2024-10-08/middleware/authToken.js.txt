@@ -1,0 +1,10 @@
+2024-10-08T13:17:18.121Z [error] Failed to send verification email {
+  "error": "self-signed certificate in certificate chain"
+}
+2024-10-08T13:17:18.138Z [error] Failed to send verification email {
+  "error": "self-signed certificate in certificate chain"
+}
+2024-10-08T13:19:01.433Z [error] Failed to send verification email {
+  "error": "self-signed certificate in certificate chain"
+}
+2024-10-08T13:47:59.096Z [error] Access denied. No token provided. 

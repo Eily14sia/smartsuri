@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // For formatting the date
+import 'package:intl/intl.dart'; 
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // For encoding the request body
+import 'dart:convert'; 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-// import 'package:smartsuri/events_button.dart'; // For environment variables
-import 'package:smartsuri/find_events_page.dart'; // For environment variables
+// import 'package:smartsuri/events_button.dart'; 
+import 'package:smartsuri/find_events_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -52,36 +52,24 @@ class _AddEventPageState extends State<AddEventPage> {
       } else {
         // Handle other errors
         print('Failed to add event with status: ${response.statusCode}');
-        if (context != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to add event with status: ${response.statusCode}')),
-          );
-        } else {
-          print('Context is null');
-        }
-      }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add event with status: ${response.statusCode}')),
+        );
+            }
     } catch (e) {
       print('Error: $e');
       // Show error message to user (optional)
-      if (context != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An error occurred: $e')),
-        );
-      } else {
-        print('Context is null');
-      }
-    }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+        }
   } else {
     print('API URL not found');
     // Show error message to user (optional)
-    if (context != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('API URL not found')),
-      );
-    } else {
-      print('Context is null');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('API URL not found')),
+    );
     }
-  }
 }
 
   @override
