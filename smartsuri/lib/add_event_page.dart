@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For formatting the date
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // For encoding the request body
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:smartsuri/events_button.dart'; // For environment variables
+import 'package:smartsuri/find_events_page.dart'; // For environment variables
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class AddEventPage extends StatefulWidget {
   final Function(Map<String, String>) onEventAdded;
@@ -21,6 +28,61 @@ class _AddEventPageState extends State<AddEventPage> {
     'Marikina', 'Muntinlupa', 'Navotas', 'Parañaque', 'Pasay', 'Pasig',
     'Quezon City', 'San Juan', 'Taguig', 'Valenzuela'
   ];
+
+ Future<void> _sendEventToApi(Map<String, String> event) async {
+  final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+
+  if (apiUrl.isNotEmpty) {
+    try {
+      var response = await http.post(
+        Uri.parse('$apiUrl/crud/event/createEvent'),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(event),
+      );
+
+      if (response.statusCode == 200) {
+        // Successfully sent the event
+        var jsonResponse = json.decode(response.body);
+        print('Event added successfully: $jsonResponse');
+        
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Event added successfully')),
+            );
+        
+      } else {
+        // Handle other errors
+        print('Failed to add event with status: ${response.statusCode}');
+        if (context != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to add event with status: ${response.statusCode}')),
+          );
+        } else {
+          print('Context is null');
+        }
+      }
+    } catch (e) {
+      print('Error: $e');
+      // Show error message to user (optional)
+      if (context != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred: $e')),
+        );
+      } else {
+        print('Context is null');
+      }
+    }
+  } else {
+    print('API URL not found');
+    // Show error message to user (optional)
+    if (context != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('API URL not found')),
+      );
+    } else {
+      print('Context is null');
+    }
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -136,16 +198,40 @@ class _AddEventPageState extends State<AddEventPage> {
               ),
               const SizedBox(height: 20),
               // Save Event Button
-              ElevatedButton(
-                onPressed: () {
+            ElevatedButton(
+                onPressed: () async {
                   if (_formKey.currentState?.validate() ?? false) {
                     Map<String, String> newEvent = {
-                      'title': _eventName,
+                      'name': _eventName,
                       'date': _eventDate,
                       'location': _selectedCity,
                     };
+                    await _sendEventToApi(newEvent); // Send the event to the API
                     widget.onEventAdded(newEvent);
-                    Navigator.pop(context);
+                    // Show success message and then navigate to EventButtonPage
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Event added successfully')),
+                    );
+                    // Delay the navigation to ensure the SnackBar is shown
+                    await Future.delayed(const Duration(seconds: 1));
+                   if (mounted) {
+                      // Retrieve the stored values from SharedPreferences
+                      final prefs = await SharedPreferences.getInstance();
+                      final profileImage = prefs.getString('profileImage') ?? '';
+                      final userName = prefs.getString('userName') ?? '';
+                      final email = prefs.getString('email') ?? '';
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FindEventsPage(
+                            profileImage: profileImage, 
+                            userName: userName,      
+                            email: email,             
+                          ),
+                        ),
+                      );
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(

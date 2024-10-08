@@ -36,9 +36,14 @@ Future<void> verifyCode(BuildContext context, String code) async {
       final accessToken = responseBody['access_token']['accessToken'];
       final userInfo = responseBody['userinfo'];
 
+
+
       // Store the access token in shared preferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('access_token', accessToken);
+         await prefs.setString('userName', userInfo['username']);
+        await prefs.setString('profileImage', userInfo['prof_img']);
+        await prefs.setString('email', userInfo['email']);
 
       // Navigate to HomePage with the response data
       Navigator.pushReplacement(

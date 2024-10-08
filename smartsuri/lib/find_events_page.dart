@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'recent_events_page.dart';
 import 'events_button.dart'; // Import the EventsButtonPage
 import 'add_event_page.dart'; // Import the AddEventPage
 import 'my_profile_page.dart'; // Import MyProfilePage
 import 'settings_page.dart'; // Import SettingsPage
 import 'home_page.dart'; // Import HomePage
+import 'config.dart'; // Import Config for API URL
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
 
 class FindEventsPage extends StatefulWidget {
   final String profileImage;
   final String userName;
   final String email;
 
-  const FindEventsPage({super.key, 
+  const FindEventsPage({
+    super.key,
     required this.profileImage,
     required this.userName,
     required this.email,
@@ -23,22 +28,53 @@ class FindEventsPage extends StatefulWidget {
 
 class _FindEventsPageState extends State<FindEventsPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   String selectedCity = 'All Cities';
+  List<Map<String, dynamic>> events = [];
+  bool isLoading = true;
 
-  List<Map<String, String>> events = [
-    {
-      'title': 'Eco-bridge Recycling Project',
-      'date': 'July 22, 2024',
-      'location': 'San Juan City',
-    },
-    {
-      'title': 'Recyclable Plastic Boats',
-      'date': 'February 24, 2024',
-      'location': 'Manila City',
-    },
-    // Add more events as needed
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchEvents();
+  }
+
+  Future<void> _fetchEvents() async {
+    final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+
+    if (apiUrl.isNotEmpty) {
+      try {
+        final response = await http.get(Uri.parse('$apiUrl/crud/event/getEvent'));
+
+        if (response.statusCode == 200) {
+          final Map<String, dynamic> jsonResponse = json.decode(response.body);
+          final List<dynamic> eventList = jsonResponse['events']; // Adjust this based on actual JSON structure
+          setState(() {
+            events = eventList.map((event) => {
+              'name': event['name'],
+              'date': event['date'],
+              'location': event['location'],
+            }).toList();
+            isLoading = false;
+          });
+        } else {
+          print('Failed to load events with status: ${response.statusCode}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to load events with status: ${response.statusCode}')),
+          );
+        }
+      } catch (e) {
+        print('Error: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred: $e')),
+        );
+      }
+    } else {
+      print('API URL not found');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('API URL not found')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -205,7 +241,10 @@ class _FindEventsPageState extends State<FindEventsPage> {
                   ),
                   const SizedBox(height: 10),
                   // Filtered Event Cards
-                  ..._buildFilteredEvents(),
+                  if (isLoading)
+                    Center(child: CircularProgressIndicator())
+                  else
+                    ..._buildFilteredEvents(),
                   const SizedBox(height: 20),
                   Center(
                     child: ElevatedButton(
@@ -341,16 +380,16 @@ class _FindEventsPageState extends State<FindEventsPage> {
 
   List<Widget> _buildFilteredEvents() {
     // Filter events based on the selected city
-    List<Map<String, String>> filteredEvents = selectedCity == 'All Cities'
+    List<Map<String, dynamic>> filteredEvents = selectedCity == 'All Cities'
         ? events
         : events.where((event) => event['location']?.contains(selectedCity) ?? false).toList();
 
     return filteredEvents.map((event) {
-      return _buildEventCard(event['title']!, event['date']!, event['location']!, context);
+      return _buildEventCard(event['name']!, event['date']!, event['location']!, context);
     }).toList();
   }
 
-  Widget _buildEventCard(String title, String date, String location, BuildContext context) {
+  Widget _buildEventCard(String name, String date, String location, BuildContext context) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -361,7 +400,7 @@ class _FindEventsPageState extends State<FindEventsPage> {
       child: ListTile(
         leading: Icon(Icons.event, color: Colors.green[900]),
         title: Text(
-          title,
+          name,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         subtitle: Column(

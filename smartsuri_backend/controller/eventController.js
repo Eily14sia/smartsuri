@@ -24,8 +24,12 @@ class EventController {
       });
 
       logger.info(`Event created: ${newEvent.name}`);
-      return res.status(201).json({ message: 'Event created successfully', event: newEvent });
-
+      return res.status(200).json({
+        resultKey: true,
+        message: 'Event created successfully',
+        resultCode: 200,
+        event: newEvent
+      });
     } catch (error) {
       // Handle Sequelize unique constraint errors
       if (error instanceof UniqueConstraintError) {
@@ -51,7 +55,10 @@ class EventController {
 
       // Log the event retrieval
       logger.info('Events retrieved successfully');
-      return res.status(200).json({ events });
+      return res.status(200).json({  resultKey: true,
+        message: 'Event fetched successfully',
+        resultCode: 200,
+        events});
     } catch (error) {
       // Log the error if something goes wrong
       logger.error(`Error fetching events: ${error.message}`);

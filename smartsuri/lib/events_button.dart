@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class EventsButtonPage extends StatefulWidget {
-  final List<Map<String, String>> events; // List of events passed to the page
+  final List<Map<String, dynamic>> events; // List of events passed to the page
 
   const EventsButtonPage({super.key, required this.events});
 
@@ -10,10 +10,10 @@ class EventsButtonPage extends StatefulWidget {
 }
 
 class _EventsButtonPageState extends State<EventsButtonPage> {
-  final String userName = "Name"; // Replace with dynamically fetched user data
-  final String userCity = "Manila City"; // Replace with dynamically fetched user data
+  late String userName; // Replace with dynamically fetched user data
+  late String userCity; // Replace with dynamically fetched user data
   late List<bool> eventAdded; // Track event addition status dynamically
-  List<Map<String, String>> filteredEvents = []; // List of filtered events
+  late List<Map<String, dynamic>> filteredEvents; // List of filtered events
   String selectedCity = 'All Cities'; // Default dropdown value
 
   final List<String> cities = [
@@ -26,6 +26,9 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
   @override
   void initState() {
     super.initState();
+    // Initialize user data
+    userName = "Name"; // Replace with actual user data fetching logic
+    userCity = "Manila City"; // Replace with actual user data fetching logic
     // Initialize eventAdded to false for all events
     eventAdded = List<bool>.filled(widget.events.length, false);
     // Initialize filteredEvents to include all events initially
@@ -125,7 +128,7 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
                   final event = filteredEvents[index];
                   return _buildEventCard(
                     context,
-                    event['title']!,
+                    event['name']!,
                     event['date']!,
                     event['location']!,
                     index,
