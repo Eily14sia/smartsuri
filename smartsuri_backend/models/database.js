@@ -52,6 +52,40 @@ const User = sequelize.define(
   { ...commonOptions, tableName: 'users' },
 )
 
+const Event = sequelize.define(
+  'events',
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    location: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
+    created_by: DataTypes.INTEGER,
+    updated_by: DataTypes.INTEGER,
+    created_at: DataTypes.DATE,
+    updated_at: DataTypes.DATE,
+    deleted_at: DataTypes.DATE,
+  },
+  { ...commonOptions, tableName: 'events' },
+)
+
 const LogMaster = sequelize.define(
   'logmaster',
   {
@@ -154,8 +188,10 @@ const logCreate = async (instance, options) => {
 }
 
 User.addHook('afterUpdate', logUpdate)
+Event.addHook('afterUpdate', logUpdate)
 
+Event.addHook('afterCreate', logCreate)
 User.addHook('afterCreate', logCreate)
 
 
-module.exports = { User, LogMaster, sequelize }
+module.exports = { User, LogMaster, Event, sequelize }

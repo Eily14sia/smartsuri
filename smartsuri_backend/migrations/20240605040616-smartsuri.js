@@ -57,6 +57,47 @@ module.exports = {
       last_login: Sequelize.DATE,
     })
 
+    await queryInterface.createTable('events', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: false,
+      },
+      date: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        unique: false,
+      },
+      location: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      isActive: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
+      },
+      created_by: Sequelize.INTEGER,
+      updated_by: Sequelize.INTEGER,
+      deleted_at: Sequelize.DATE,
+    })
+
     // Create the 'logmaster' table
     await queryInterface.createTable('logmaster', {
       id: {
@@ -108,6 +149,8 @@ module.exports = {
       },
     })
   },
+
+  
 
   down: async (queryInterface, Sequelize) => {
     try {

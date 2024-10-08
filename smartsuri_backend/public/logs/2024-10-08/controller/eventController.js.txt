@@ -1,0 +1,10 @@
+2024-10-08T05:30:22.893Z [error] Error creating event: notNull Violation: events.isActive cannot be null 
+2024-10-08T05:30:49.905Z [error] Error creating event: Cannot read properties of undefined (reading 'id') 
+2024-10-08T05:35:02.195Z [error] Error creating event: notNull Violation: logmaster.tablename cannot be null,
+notNull Violation: logmaster.requested_data cannot be null,
+notNull Violation: logmaster.change_data cannot be null,
+notNull Violation: logmaster.isActive cannot be null 
+2024-10-08T05:35:34.556Z [error] Error creating event: Cannot read properties of undefined (reading 'id') 
+2024-10-08T05:35:55.754Z [info] Event created: Testing Events 
+2024-10-08T05:36:34.429Z [error] Error fetching events: Unknown column 'last_login' in 'field list' 
+2024-10-08T05:37:00.641Z [info] Events retrieved successfully 
