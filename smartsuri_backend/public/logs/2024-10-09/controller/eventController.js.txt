@@ -38,3 +38,6 @@
 2024-10-09T08:25:02.621Z [info] Events retrieved successfully 
 2024-10-09T08:25:04.341Z [info] Event retrieved successfully: Test Event 
 2024-10-09T08:25:06.325Z [info] Email sent to eilywow14@gmail.com regarding event: Test Event 
+2024-10-09T15:32:45.521Z [info] Events retrieved successfully 
+2024-10-09T15:32:53.158Z [info] Event retrieved successfully: Test Event 
+2024-10-09T15:33:26.183Z [info] Email sent to eilywow14@gmail.com regarding event: Test Event 

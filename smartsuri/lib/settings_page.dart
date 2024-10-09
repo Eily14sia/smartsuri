@@ -11,7 +11,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:html' as html; // For handling file uploads in web
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter/foundation.dart' as foundation;
+import 'dart:io';
 
 class SettingsPage extends StatefulWidget {
   final String profileImage;
@@ -41,6 +42,8 @@ class _SettingsPageState extends State<SettingsPage> {
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
+
+  String _profileImageController = '';
 
   bool _isLoading = false;
 
@@ -253,81 +256,56 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
- // Change Email Dialog
 void _showChangeEmailDialog() {
-  _showCustomDialog(
-    context,
-    title: 'Change Email',
-    content: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildCustomTextField('Enter new email', controller: _emailController),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return AlertDialog(
+            title: const Text('Change Email'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildCustomTextField('Enter new email', controller: _emailController),
+                    ),
+                    const SizedBox(width: 10),
+                    _isLoading
+                        ? CircularProgressIndicator()
+                        : ElevatedButton(
+                            onPressed: () => _sendOTP(setState),
+                            style: _buttonStyle(),
+                            child: const Text('Send OTP'),
+                          ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _buildCustomTextField('Enter OTP', controller: _codeController),
+              ],
             ),
-            const SizedBox(width: 10),
-            _isLoading
-                ? CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _sendOTP,
-                    style: _buttonStyle(), // Green background with white text
-                    child: const Text('Send OTP'),
-                  ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        _buildCustomTextField('Enter OTP', controller: _codeController),
-      ],
-    ),
-    actions: [
-      TextButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        child: const Text('Cancel'),
-      ),
-      TextButton(
-        onPressed: _changeEmail,
-        child: const Text('Save'),
-      ),
-    ],
-  );
-}
-
-  // Change Profile Information Dialog
-  void _showChangeProfileInfoDialog() {
-    _showCustomDialog(
-      context,
-      title: 'Change Profile Information',
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildBirthdayField(),
-          const SizedBox(height: 10),
-          _buildCityDropdown(),
-          const SizedBox(height: 10),
-          _buildProfileImages(),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
+            actions: [
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
                 child: const Text('Cancel'),
               ),
-              ElevatedButton(
-                onPressed: _changeProfileInfo,
+              TextButton(
+                onPressed: () => _changeEmail(setState),
                 child: const Text('Save'),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
+          );
+        },
+      );
+    },
+  );
+}
+
+
 
   // Change Password Dialog
   void _showChangePasswordDialog() {
@@ -385,109 +363,133 @@ void _showChangeEmailDialog() {
     );
   }
 
-  // Create birthday field
-  Widget _buildBirthdayField() {
-    return TextField(
-      controller: _birthdayController,
-      decoration: InputDecoration(
-        border: const OutlineInputBorder(),
-        hintText: 'Enter your birthday',
-        suffixIcon: IconButton(
-          icon: const Icon(Icons.calendar_today),
-          onPressed: () async {
-            DateTime? pickedDate = await showDatePicker(
-              context: context,
-              initialDate: DateTime.now(),
-              firstDate: DateTime(1900),
-              lastDate: DateTime(2100),
-            );
-            if (pickedDate != null) {
-              setState(() {
-                _birthdayController.text = "${pickedDate.toLocal()}".split(' ')[0];
-              });
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  // Create city dropdown
-  Widget _buildCityDropdown() {
-    return DropdownButtonFormField<String>(
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(),
-        hintText: 'Select your city',
-      ),
-      items: <String>['City1', 'City2', 'City3'].map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-      onChanged: (String? newValue) {
-        setState(() {
-          _cityController.text = newValue ?? '';
-        });
-      },
-    );
-  }
-
-  // Create profile images
-  Widget _buildProfileImages() {
-    return Column(
-      children: [
-        Text('Profile Image'),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            GestureDetector(
-              onTap: () async {
-                if (kIsWeb) {
-                  // Handle file upload for web
-                  html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-                  uploadInput.accept = 'image/*';
-                  uploadInput.click();
-
-                  uploadInput.onChange.listen((e) {
-                    final files = uploadInput.files;
-                    if (files!.isNotEmpty) {
-                      final reader = html.FileReader();
-                      reader.readAsDataUrl(files[0]);
-                      reader.onLoadEnd.listen((e) {
-                        setState(() {
-                          _selectedProfileImage = reader.result as String;
-                        });
-                      });
-                    }
-                  });
-                } else {
-                  // Handle file upload for mobile
-                  final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-                  if (pickedFile != null) {
-                    final bytes = await pickedFile.readAsBytes();
-                    setState(() {
-                      _selectedProfileImage = base64Encode(bytes);
-                    });
-                  }
-                }
-              },
-              child: Container(
-                width: 50,
-                height: 50,
-                color: _selectedProfileImage != null ? Colors.blue : Colors.grey,
-                child: Center(
-                  child: _selectedProfileImage != null
-                      ? Icon(Icons.check, color: Colors.white)
-                      : Text('Upload'),
+ void _showChangeProfileInfoDialog() {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setDialogState) {
+          return AlertDialog(
+            title: const Text('Change Profile Information'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildBirthdayField(setDialogState),
+                const SizedBox(height: 10),
+                _buildCityDropdown(setDialogState),
+                const SizedBox(height: 10),
+                _buildProfileImageSelector(setDialogState),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: _changeProfileInfo,
+                      child: const Text('Save'),
+                      
+                    ),
+                  ],
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ],
-    );
+          );
+        },
+      );
+    },
+  );
+}
+
+Widget _buildBirthdayField(StateSetter setDialogState) {
+  return TextField(
+    controller: _birthdayController,
+    decoration: InputDecoration(
+      border: const OutlineInputBorder(),
+      hintText: 'Enter your birthday',
+      suffixIcon: IconButton(
+        icon: const Icon(Icons.calendar_today),
+        onPressed: () async {
+          DateTime? pickedDate = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(1900),
+            lastDate: DateTime(2100),
+          );
+          if (pickedDate != null) {
+            setDialogState(() {
+              _birthdayController.text = "${pickedDate.toLocal()}".split(' ')[0];
+            });
+          }
+        },
+      ),
+    ),
+  );
+}
+
+Widget _buildCityDropdown(StateSetter setDialogState) {
+  return DropdownButtonFormField<String>(
+    decoration: const InputDecoration(
+      border: OutlineInputBorder(),
+      hintText: 'Select your city',
+    ),
+    items: <String>[ 'Caloocan', 'Las Piñas', 'Makati', 'Malabon', 'Mandaluyong', 'Manila',
+    'Marikina', 'Muntinlupa', 'Navotas', 'Parañaque', 'Pasay', 'Pasig',
+    'Quezon City', 'San Juan', 'Taguig', 'Valenzuela'].map((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList(),
+    onChanged: (String? newValue) {
+      setDialogState(() {
+        _cityController.text = newValue ?? '';
+      });
+    },
+  );
+}
+
+Widget _buildProfileImageSelector(StateSetter setDialogState) {
+  return GestureDetector(
+    onTap: () => _pickImageFromGallery(setDialogState),
+    child: CircleAvatar(
+      radius: 50,
+      backgroundColor: Colors.grey[300],
+      backgroundImage: _profileImageController.isNotEmpty 
+          ? MemoryImage(base64Decode(_profileImageController)) as ImageProvider
+          : null,
+      child: _profileImageController.isEmpty
+          ? Icon(Icons.add_a_photo, color: Colors.grey[600], size: 50)
+          : null,
+    ),
+  );
+}
+
+Future<void> _pickImageFromGallery(StateSetter setDialogState) async {
+  final ImagePicker picker = ImagePicker();
+  final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+  if (pickedFile != null) {
+    if (foundation.kIsWeb) {
+      final bytes = await pickedFile.readAsBytes();
+      final base64String = base64Encode(bytes);
+      setDialogState(() {
+        _profileImageController = base64String;
+      });
+    } else {
+      final bytes = await File(pickedFile.path).readAsBytes();
+      final base64String = base64Encode(bytes);
+
+      setDialogState(() {
+        _profileImageController = base64String;
+      });
+    }
   }
+}
 
   // Common button style
   ButtonStyle _buttonStyle() {
@@ -530,9 +532,6 @@ Future<void> _changePassword() async {
         'newPassword': newPassword,
       };
 
-      // Print the data being sent to the API
-      print('Sending data to updatePassword API: $data');
-
       final response = await http.put(
         Uri.parse('$apiUrl/crud/user/updatePassword'),
         headers: <String, String>{
@@ -544,10 +543,24 @@ Future<void> _changePassword() async {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password changed successfully')),
+          const SnackBar(content: Text('Password changed successfully. Login Aagin.')),
         );
-        Navigator.of(context).pop();
-      } else {
+          // Set access_token to null in SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('access_token');
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const IndexPage()), // Redirect to login page
+          (route) => false,
+        );
+      } 
+      else if  (response.statusCode == 400) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Current password is incorrect')),
+        );
+      }
+      else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to change password with status: ${response.statusCode}')),
         );
@@ -589,9 +602,6 @@ Future<void> _changeUsername() async {
         'username': username,
       };
 
-      // Print the data being sent to the API
-      print('Sending data to updateUsername API: $data');
-
       final response = await http.put(
         Uri.parse('$apiUrl/crud/user/updateUsername'),
         headers: <String, String>{
@@ -603,9 +613,18 @@ Future<void> _changeUsername() async {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Username changed successfully')),
+          const SnackBar(content: Text('Username changed successfully. Login Again.')),
         );
-        Navigator.of(context).pop();
+
+            // Set access_token to null in SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('access_token');
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const IndexPage()), // Redirect to login page
+          (route) => false,
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to change username with status: ${response.statusCode}')),
@@ -625,10 +644,11 @@ Future<void> _changeUsername() async {
   }
 }
 
-  // Change Profile Information API Call
+ // Change Profile Information API Call
   Future<void> _changeProfileInfo() async {
     final String birthday = _birthdayController.text;
     final String city = _cityController.text;
+    final String profileImage = _profileImageController;
 
     final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
 
@@ -648,11 +668,8 @@ Future<void> _changeUsername() async {
         final data = <String, String>{
           'birthday': birthday,
           'city': city,
-          'profileImage': _selectedProfileImage,
+          'profileImage': profileImage,
         };
-
-        // Print the data being sent to the API
-        print('Sending data to updateProfileInformation API: $data');
 
         final response = await http.put(
           Uri.parse('$apiUrl/crud/user/updateProfileInformation'),
@@ -665,9 +682,18 @@ Future<void> _changeUsername() async {
 
         if (response.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile information updated successfully')),
+            const SnackBar(content: Text('Profile information updated successfully. Login Again.')),
           );
-          Navigator.of(context).pop();
+
+              // Set access_token to null in SharedPreferences
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.remove('access_token');
+
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const IndexPage()), // Redirect to login page
+              (route) => false,
+            );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Failed to update profile information with status: ${response.statusCode}')),
@@ -688,7 +714,7 @@ Future<void> _changeUsername() async {
   }
 
   // Change Email API Call
-  Future<void> _changeEmail() async {
+  Future<void> _changeEmail(StateSetter setDialogState) async {
   final String email = _emailController.text;
   final String code = _codeController.text;
 
@@ -712,9 +738,6 @@ Future<void> _changeUsername() async {
         'code': code,
       };
 
-      // Print the data being sent to the API
-      print('Sending data to updateEmail API: $data');
-
       final response = await http.put(
         Uri.parse('$apiUrl/crud/user/updateEmail'),
         headers: <String, String>{
@@ -726,9 +749,18 @@ Future<void> _changeUsername() async {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Email changed successfully')),
+          const SnackBar(content: Text('Email changed successfully. Login Again.')),
         );
-        Navigator.of(context).pop();
+            // Set access_token to null in SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('access_token');
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const IndexPage()), // Redirect to login page
+          (route) => false,
+        );
+        
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to change email with status: ${response.statusCode}')),
@@ -749,10 +781,10 @@ Future<void> _changeUsername() async {
 }
 
   // Send OTP API Call
-  Future<void> _sendOTP() async {
-    setState(() {
-      _isLoading = true;
-    });
+  Future<void> _sendOTP(StateSetter setDialogState) async {
+   setDialogState(() {
+    _isLoading = true;
+  });
 
     final String email = _emailController.text;
     final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
@@ -784,16 +816,16 @@ Future<void> _changeUsername() async {
           SnackBar(content: Text('An error occurred: $e')),
         );
       } finally {
-        setState(() {
-          _isLoading = false;
-        });
+         setDialogState(() {
+        _isLoading = false;
+      });
       }
     } else {
       print('API URL not found');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('API URL not found')),
       );
-      setState(() {
+       setDialogState(() {
         _isLoading = false;
       });
     }
