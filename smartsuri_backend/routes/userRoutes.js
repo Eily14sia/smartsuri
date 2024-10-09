@@ -17,11 +17,11 @@ router.post('/createUser', upload.none(), UserController.createUser);
 router.post('/verifyEmail', upload.none(), UserController.verifyEmail)
 
 // Other endpoints that require authentication
-router.put('/updateUsername/:id', authenticateToken, upload.none(), UserController.updateUsername);
-router.put('/updateEmail/:id', authenticateToken, upload.none(), UserController.updateEmail);
-router.post('/verifyOTP', upload.none(), UserController.verifyOTP);
+router.put('/updateUsername', authenticateToken, upload.none(), UserController.updateUsername);
+router.put('/updateEmail', authenticateToken, upload.none(), UserController.updateEmail);
+router.post('/sendOTP', upload.none(), UserController.sendOTP);
 
-router.put('/updateProfileInformation/:id', authenticateToken, upload.none(), UserController.updateProfileInfo);
-router.put('/updatePassword/:id', authenticateToken, upload.none(), UserController.updatePassword);
+router.put('/updateProfileInformation', authenticateToken, upload.none(), UserController.updateProfileInfo);
+router.put('/updatePassword', authenticateToken, upload.none(), UserController.updatePassword);
 
 module.exports = router;

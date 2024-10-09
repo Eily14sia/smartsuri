@@ -103,12 +103,13 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
     }
   }
 
-  // Method to store event details in shared preferences
+ // Method to store event details in shared preferences
   Future<void> _storeEventDetails(String id, String name, String date, String location) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('event_${id}_name', name);
     await prefs.setString('event_${id}_date', date);
     await prefs.setString('event_${id}_location', location);
+
   }
 
   // Method to filter events based on selected city

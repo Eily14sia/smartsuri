@@ -17,12 +17,17 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool _obscureText = true;
+  bool isLoading = false;
 
   // Function to handle login request
   Future<void> loginUser(String email, String password) async {
     final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
 
     if (apiUrl.isNotEmpty) {
+      setState(() {
+        isLoading = true; // Show loading indicator
+      });
+      
       try {
         var response = await http.post(
           Uri.parse('$apiUrl/auth/login'),
@@ -32,6 +37,9 @@ class _LoginPageState extends State<LoginPage> {
             'password': password,
           }),
         );
+        setState(() {
+              isLoading = false; // Hide loading indicator
+            });
 
          if (response.statusCode == 200) {
         // Handle successful login
@@ -186,7 +194,9 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      ElevatedButton(
+                      isLoading
+                      ? CircularProgressIndicator() // Show loading indicator
+                      :ElevatedButton(
                         onPressed: () {
                           final email = emailController.text;
                           final password = passwordController.text;

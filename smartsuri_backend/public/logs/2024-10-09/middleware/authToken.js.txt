@@ -1,0 +1,11 @@
+2024-10-09T07:06:38.971Z [error] Access denied. No token provided. 
+2024-10-09T07:15:17.856Z [error] Missing required field: oldPassword {
+  "data": {}
+}
+2024-10-09T07:24:47.281Z [error] Failed to send verification email {
+  "error": "No recipients defined"
+}
+2024-10-09T07:25:59.770Z [error] Failed to send verification email {
+  "error": "No recipients defined"
+}
+2024-10-09T09:04:39.881Z [error] Access denied. No token provided. 

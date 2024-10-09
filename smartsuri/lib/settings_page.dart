@@ -5,6 +5,13 @@ import 'privacy_policy.dart'; // For navigation to Privacy Policy
 import 'main.dart'; // For redirection after logging out
 import 'dart:typed_data';
 import 'dart:convert'; // Import to use base64Decode
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html; // For handling file uploads in web
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class SettingsPage extends StatefulWidget {
   final String profileImage;
@@ -25,6 +32,19 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   String _selectedProfileImage = 'assets/profile2.png';
   Uint8List? _decodedImage;
+
+  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmNewPasswordController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _birthdayController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _codeController = TextEditingController();
+
+  bool _isLoading = false;
+
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -217,11 +237,23 @@ class _SettingsPageState extends State<SettingsPage> {
     _showCustomDialog(
       context,
       title: 'Change Username',
-      content: _buildCustomTextField('Enter new username'),
+      content: _buildCustomTextField('Enter new username', controller: _usernameController),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: _changeUsername,
+          child: const Text('Save'),
+        ),
+      ],
     );
   }
 
-  // Change Email Dialog
+ // Change Email Dialog
 void _showChangeEmailDialog() {
   _showCustomDialog(
     context,
@@ -232,21 +264,34 @@ void _showChangeEmailDialog() {
         Row(
           children: [
             Expanded(
-              child: _buildCustomTextField('Enter new email'),
+              child: _buildCustomTextField('Enter new email', controller: _emailController),
             ),
             const SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () {
-                // Add your send OTP logic here
-              },
-              child: const Text('Send OTP'),
-            ),
+            _isLoading
+                ? CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: _sendOTP,
+                    style: _buttonStyle(), // Green background with white text
+                    child: const Text('Send OTP'),
+                  ),
           ],
         ),
         const SizedBox(height: 20),
-        _buildCustomTextField('Enter OTP'),
+        _buildCustomTextField('Enter OTP', controller: _codeController),
       ],
     ),
+    actions: [
+      TextButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        child: const Text('Cancel'),
+      ),
+      TextButton(
+        onPressed: _changeEmail,
+        child: const Text('Save'),
+      ),
+    ],
   );
 }
 
@@ -263,6 +308,22 @@ void _showChangeEmailDialog() {
           _buildCityDropdown(),
           const SizedBox(height: 10),
           _buildProfileImages(),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: _changeProfileInfo,
+                child: const Text('Save'),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -276,58 +337,46 @@ void _showChangeEmailDialog() {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildCustomTextField('Current Password', isPassword: true),
+          _buildCustomTextField('Current Password', controller: _currentPasswordController, isPassword: true),
           const SizedBox(height: 10),
-          _buildCustomTextField('New Password', isPassword: true),
+          _buildCustomTextField('New Password', controller: _newPasswordController, isPassword: true),
           const SizedBox(height: 10),
-          _buildCustomTextField('Confirm New Password', isPassword: true),
+          _buildCustomTextField('Confirm New Password', controller: _confirmNewPasswordController, isPassword: true),
         ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: _changePassword,
+          child: const Text('Save'),
+        ),
+      ],
     );
   }
 
   // Common custom dialog builder
-  void _showCustomDialog(BuildContext context, {required String title, required Widget content}) {
+  void _showCustomDialog(BuildContext context, {required String title, required Widget content, List<Widget>? actions}) {
     showDialog(
       context: context,
       builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-            side: BorderSide(color: Colors.green[900]!, width: 2), // Green border outline
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green[900],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                content,
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: _buttonStyle(), // Green background with white text
-                  child: const Text('Save'),
-                ),
-              ],
-            ),
-          ),
+        return AlertDialog(
+          title: Text(title),
+          content: content,
+          actions: actions,
         );
       },
     );
   }
 
   // Create custom text field
-  Widget _buildCustomTextField(String hint, {bool isPassword = false}) {
+  Widget _buildCustomTextField(String hint, {bool isPassword = false, TextEditingController? controller}) {
     return TextField(
+      controller: controller,
       obscureText: isPassword,
       decoration: InputDecoration(
         border: const OutlineInputBorder(),
@@ -339,13 +388,24 @@ void _showChangeEmailDialog() {
   // Create birthday field
   Widget _buildBirthdayField() {
     return TextField(
+      controller: _birthdayController,
       decoration: InputDecoration(
         border: const OutlineInputBorder(),
         hintText: 'Enter your birthday',
         suffixIcon: IconButton(
           icon: const Icon(Icons.calendar_today),
-          onPressed: () {
-            // Add date picker logic
+          onPressed: () async {
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1900),
+              lastDate: DateTime(2100),
+            );
+            if (pickedDate != null) {
+              setState(() {
+                _birthdayController.text = "${pickedDate.toLocal()}".split(' ')[0];
+              });
+            }
           },
         ),
       ),
@@ -366,35 +426,66 @@ void _showChangeEmailDialog() {
         );
       }).toList(),
       onChanged: (String? newValue) {
-        // Handle city selection
+        setState(() {
+          _cityController.text = newValue ?? '';
+        });
       },
     );
   }
 
   // Create profile images
   Widget _buildProfileImages() {
-    return Wrap(
-      spacing: 10,
+    return Column(
       children: [
-        _buildProfileImageOption('assets/profile1.png'),
-        _buildProfileImageOption('assets/profile2.png'),
-        _buildProfileImageOption('assets/profile3.png'),
-      ],
-    );
-  }
+        Text('Profile Image'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            GestureDetector(
+              onTap: () async {
+                if (kIsWeb) {
+                  // Handle file upload for web
+                  html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+                  uploadInput.accept = 'image/*';
+                  uploadInput.click();
 
-  // Create profile image option
-  Widget _buildProfileImageOption(String assetPath) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedProfileImage = assetPath;
-        });
-      },
-      child: CircleAvatar(
-        radius: 30,
-        backgroundImage: AssetImage(assetPath),
-      ),
+                  uploadInput.onChange.listen((e) {
+                    final files = uploadInput.files;
+                    if (files!.isNotEmpty) {
+                      final reader = html.FileReader();
+                      reader.readAsDataUrl(files[0]);
+                      reader.onLoadEnd.listen((e) {
+                        setState(() {
+                          _selectedProfileImage = reader.result as String;
+                        });
+                      });
+                    }
+                  });
+                } else {
+                  // Handle file upload for mobile
+                  final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+                  if (pickedFile != null) {
+                    final bytes = await pickedFile.readAsBytes();
+                    setState(() {
+                      _selectedProfileImage = base64Encode(bytes);
+                    });
+                  }
+                }
+              },
+              child: Container(
+                width: 50,
+                height: 50,
+                color: _selectedProfileImage != null ? Colors.blue : Colors.grey,
+                child: Center(
+                  child: _selectedProfileImage != null
+                      ? Icon(Icons.check, color: Colors.white)
+                      : Text('Upload'),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -405,4 +496,308 @@ void _showChangeEmailDialog() {
       foregroundColor: Colors.white, // White text color
     );
   }
+
+// Change Password API Call
+Future<void> _changePassword() async {
+  final String currentPassword = _currentPasswordController.text;
+  final String newPassword = _newPasswordController.text;
+  final String confirmNewPassword = _confirmNewPasswordController.text;
+
+  if (newPassword != confirmNewPassword) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('New passwords do not match')),
+    );
+    return;
+  }
+
+  final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+
+  if (apiUrl.isNotEmpty) {
+    try {
+      // Retrieve the access token from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final String? accessToken = prefs.getString('access_token');
+
+      if (accessToken == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Access token not found')),
+        );
+        return;
+      }
+
+      final data = <String, String>{
+        'oldPassword': currentPassword,
+        'newPassword': newPassword,
+      };
+
+      // Print the data being sent to the API
+      print('Sending data to updatePassword API: $data');
+
+      final response = await http.put(
+        Uri.parse('$apiUrl/crud/user/updatePassword'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password changed successfully')),
+        );
+        Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to change password with status: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    }
+  } else {
+    print('API URL not found');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('API URL not found')),
+    );
+  }
+}
+
+// Change Username API Call
+Future<void> _changeUsername() async {
+  final String username = _usernameController.text;
+
+  final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+
+  if (apiUrl.isNotEmpty) {
+    try {
+      // Retrieve the access token from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final String? accessToken = prefs.getString('access_token');
+
+      if (accessToken == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Access token not found')),
+        );
+        return;
+      }
+
+      final data = <String, String>{
+        'username': username,
+      };
+
+      // Print the data being sent to the API
+      print('Sending data to updateUsername API: $data');
+
+      final response = await http.put(
+        Uri.parse('$apiUrl/crud/user/updateUsername'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Username changed successfully')),
+        );
+        Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to change username with status: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    }
+  } else {
+    print('API URL not found');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('API URL not found')),
+    );
+  }
+}
+
+  // Change Profile Information API Call
+  Future<void> _changeProfileInfo() async {
+    final String birthday = _birthdayController.text;
+    final String city = _cityController.text;
+
+    final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+
+    if (apiUrl.isNotEmpty) {
+      try {
+        // Retrieve the access token from SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        final String? accessToken = prefs.getString('access_token');
+
+        if (accessToken == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Access token not found')),
+          );
+          return;
+        }
+
+        final data = <String, String>{
+          'birthday': birthday,
+          'city': city,
+          'profileImage': _selectedProfileImage,
+        };
+
+        // Print the data being sent to the API
+        print('Sending data to updateProfileInformation API: $data');
+
+        final response = await http.put(
+          Uri.parse('$apiUrl/crud/user/updateProfileInformation'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'Bearer $accessToken',
+          },
+          body: jsonEncode(data),
+        );
+
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Profile information updated successfully')),
+          );
+          Navigator.of(context).pop();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to update profile information with status: ${response.statusCode}')),
+          );
+        }
+      } catch (e) {
+        print('Error: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred: $e')),
+        );
+      }
+    } else {
+      print('API URL not found');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('API URL not found')),
+      );
+    }
+  }
+
+  // Change Email API Call
+  Future<void> _changeEmail() async {
+  final String email = _emailController.text;
+  final String code = _codeController.text;
+
+  final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+
+  if (apiUrl.isNotEmpty) {
+    try {
+      // Retrieve the access token from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final String? accessToken = prefs.getString('access_token');
+
+      if (accessToken == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Access token not found')),
+        );
+        return;
+      }
+
+      final data = <String, String>{
+        'email': email,
+        'code': code,
+      };
+
+      // Print the data being sent to the API
+      print('Sending data to updateEmail API: $data');
+
+      final response = await http.put(
+        Uri.parse('$apiUrl/crud/user/updateEmail'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email changed successfully')),
+        );
+        Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to change email with status: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    }
+  } else {
+    print('API URL not found');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('API URL not found')),
+    );
+  }
+}
+
+  // Send OTP API Call
+  Future<void> _sendOTP() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final String email = _emailController.text;
+    final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+
+    if (apiUrl.isNotEmpty) {
+      try {
+        final response = await http.post(
+          Uri.parse('$apiUrl/crud/user/sendOTP'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            'email': email,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('OTP sent successfully')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to send OTP with status: ${response.statusCode}')),
+          );
+        }
+      } catch (e) {
+        print('Error: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred: $e')),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } else {
+      print('API URL not found');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('API URL not found')),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+
 }

@@ -1,0 +1,40 @@
+2024-10-09T05:55:28.070Z [info] Events retrieved successfully 
+2024-10-09T05:55:40.843Z [info] Events retrieved successfully 
+2024-10-09T06:17:32.271Z [info] Events retrieved successfully 
+2024-10-09T06:17:38.860Z [info] Event retrieved successfully: Test Event 
+2024-10-09T06:17:53.027Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Test Event 
+2024-10-09T06:17:54.439Z [info] Events retrieved successfully 
+2024-10-09T06:17:56.977Z [info] Event retrieved successfully: Testing Events 
+2024-10-09T06:18:01.756Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Testing Events 
+2024-10-09T06:21:09.009Z [info] Events retrieved successfully 
+2024-10-09T06:21:12.933Z [info] Event retrieved successfully: Test Event 
+2024-10-09T06:21:27.417Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Test Event 
+2024-10-09T06:25:30.022Z [info] Events retrieved successfully 
+2024-10-09T06:25:31.734Z [info] Event retrieved successfully: Test Event 
+2024-10-09T06:25:34.435Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Test Event 
+2024-10-09T06:31:24.739Z [info] Events retrieved successfully 
+2024-10-09T06:31:28.185Z [info] Event retrieved successfully: Testing Events 
+2024-10-09T06:31:30.174Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Testing Events 
+2024-10-09T06:31:37.626Z [info] Event retrieved successfully: testing mobile 
+2024-10-09T06:31:39.515Z [info] Email sent to barveilyengco1214@gmail.com regarding event: testing mobile 
+2024-10-09T06:31:42.902Z [info] Event retrieved successfully: Testing Event 2 mobile 
+2024-10-09T06:31:44.931Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Testing Event 2 mobile 
+2024-10-09T06:35:39.613Z [info] Events retrieved successfully 
+2024-10-09T06:35:41.175Z [info] Event retrieved successfully: Test Event 
+2024-10-09T06:35:56.967Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Test Event 
+2024-10-09T06:36:45.231Z [info] Event retrieved successfully: Testing Events 
+2024-10-09T06:37:21.476Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Testing Events 
+2024-10-09T06:44:27.825Z [info] Events retrieved successfully 
+2024-10-09T06:44:29.602Z [info] Event retrieved successfully: Test Event 
+2024-10-09T06:44:57.642Z [error] Error getting event by ID: read ECONNRESET {
+  "stack": "Error: read ECONNRESET\n    at TLSWrap.onStreamRead (node:internal/stream_base_commons:217:20)"
+}
+2024-10-09T06:47:24.212Z [info] Events retrieved successfully 
+2024-10-09T06:47:25.948Z [info] Event retrieved successfully: Test Event 
+2024-10-09T06:47:30.593Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Test Event 
+2024-10-09T06:47:36.735Z [info] Event retrieved successfully: Testing Mobile 3 
+2024-10-09T06:47:39.265Z [info] Email sent to barveilyengco1214@gmail.com regarding event: Testing Mobile 3 
+2024-10-09T06:52:56.523Z [info] Events retrieved successfully 
+2024-10-09T08:25:02.621Z [info] Events retrieved successfully 
+2024-10-09T08:25:04.341Z [info] Event retrieved successfully: Test Event 
+2024-10-09T08:25:06.325Z [info] Email sent to eilywow14@gmail.com regarding event: Test Event 

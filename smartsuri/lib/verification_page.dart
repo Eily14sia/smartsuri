@@ -5,8 +5,7 @@ import 'home_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-class VerificationPage extends StatelessWidget {
+class VerificationPage extends StatefulWidget {
   final String email;
   final String profileImage;
   final String userName;
@@ -18,67 +17,85 @@ class VerificationPage extends StatelessWidget {
     required this.userName,
   });
 
-Future<void> verifyCode(BuildContext context, String code) async {
-  final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+  @override
+  _VerificationPageState createState() => _VerificationPageState();
+}
 
-  try {
-    final response = await http.post(
-      Uri.parse('$apiUrl/auth/verifCode'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'code': code}),
-    );
+class _VerificationPageState extends State<VerificationPage> {
+  bool isLoading = false;
+  bool isResending = false;
 
-    if (response.statusCode == 200) {
-      // Decode the response
-      final responseBody = jsonDecode(response.body);
+  Future<void> verifyCode(BuildContext context, String code) async {
+    final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
 
-      // Extract data
-      final accessToken = responseBody['access_token']['accessToken'];
-      final userInfo = responseBody['userinfo'];
+    setState(() {
+      isLoading = true;
+    });
 
+    try {
+      final response = await http.post(
+        Uri.parse('$apiUrl/auth/verifCode'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': widget.email, 'code': code}),
+      );
 
+      if (response.statusCode == 200) {
+        // Decode the response
+        final responseBody = jsonDecode(response.body);
 
-      // Store the access token in shared preferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('access_token', accessToken);
-         await prefs.setString('userName', userInfo['username']);
+        // Extract data
+        final accessToken = responseBody['access_token']['accessToken'];
+        final userInfo = responseBody['userinfo'];
+
+        // Store the access token in shared preferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('access_token', accessToken);
+        await prefs.setString('userName', userInfo['username']);
         await prefs.setString('profileImage', userInfo['prof_img']);
         await prefs.setString('email', userInfo['email']);
 
-      // Navigate to HomePage with the response data
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(
-            userName: userInfo['username'],
-            profileImage: userInfo['prof_img'], // Use default or update as needed
-            email: userInfo['email'],
+        // Navigate to HomePage with the response data
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(
+              userName: userInfo['username'],
+              profileImage: userInfo['prof_img'], // Use default or update as needed
+              email: userInfo['email'],
+            ),
           ),
-        ),
-      );
-    } else {
-      // Handle error
-      final responseBody = jsonDecode(response.body);
-      final errorMessage = responseBody['errorMessage'] ?? 'Invalid verification code';
+        );
+      } else {
+        // Handle error
+        final responseBody = jsonDecode(response.body);
+        final errorMessage = responseBody['errorMessage'] ?? 'Invalid verification code';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
+    } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
+        SnackBar(content: Text('An error occurred: $error')),
       );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
-  } catch (error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('An error occurred: $error')),
-    );
   }
-}
 
   Future<void> resendVerificationCode(BuildContext context) async {
     final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+
+    setState(() {
+      isResending = true;
+    });
 
     try {
       final response = await http.post(
         Uri.parse('$apiUrl/auth/resendCode'), // URL for resending the code
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email}),
+        body: jsonEncode({'email': widget.email}),
       );
 
       if (response.statusCode == 200) {
@@ -98,6 +115,10 @@ Future<void> verifyCode(BuildContext context, String code) async {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An error occurred: $error')),
       );
+    } finally {
+      setState(() {
+        isResending = false;
+      });
     }
   }
 
@@ -154,7 +175,7 @@ Future<void> verifyCode(BuildContext context, String code) async {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  email,
+                  widget.email,
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.green[700]!,
@@ -183,16 +204,18 @@ Future<void> verifyCode(BuildContext context, String code) async {
                 ),
                 const SizedBox(height: 30),
                 ElevatedButton(
-                  onPressed: () {
-                    final enteredCode = codeController.text;
-                    if (enteredCode.isNotEmpty) {
-                      verifyCode(context, enteredCode);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please enter the code')),
-                      );
-                    }
-                  },
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          final enteredCode = codeController.text;
+                          if (enteredCode.isNotEmpty) {
+                            verifyCode(context, enteredCode);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please enter the code')),
+                            );
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                     shape: RoundedRectangleBorder(
@@ -200,21 +223,28 @@ Future<void> verifyCode(BuildContext context, String code) async {
                     ),
                     backgroundColor: Colors.green[900]!,
                   ),
-                  child: const Text(
-                    'VERIFY',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  child: isLoading
+                      ? const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : const Text(
+                          'VERIFY',
+                          style: TextStyle(color: Colors.white),
+                        ),
                 ),
                 const SizedBox(height: 20),
-                 const SizedBox(height: 20),
                 TextButton(
-                  onPressed: () {
-                    resendVerificationCode(context);
-                  },
-                  child: Text(
-                    'Resend Code?',
-                    style: TextStyle(color: Colors.green[900]!),
-                  ),
+                  onPressed: isResending
+                      ? null
+                      : () {
+                          resendVerificationCode(context);
+                        },
+                  child: isResending
+                      ? const CircularProgressIndicator()
+                      : Text(
+                          'Resend Code?',
+                          style: TextStyle(color: Colors.green[900]!),
+                        ),
                 ),
                 const SizedBox(height: 20),
               ],

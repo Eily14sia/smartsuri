@@ -94,10 +94,11 @@ class AuthService {
     const payload = {
       id: user.id,
       username: user.username,
+      email: user.email,
       role_id: user.role_id,
     };
 
-    const accessToken = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+    const accessToken = jwt.sign(payload, secretKey);
     const refreshToken = jwt.sign(payload, secretKey, { expiresIn: '7d' });
 
     return { accessToken, refreshToken };

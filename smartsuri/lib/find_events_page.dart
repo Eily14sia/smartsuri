@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'recent_events_page.dart';
 import 'events_button.dart'; // Import the EventsButtonPage
 import 'add_event_page.dart'; // Import the AddEventPage
 import 'my_profile_page.dart'; // Import MyProfilePage
 import 'settings_page.dart'; // Import SettingsPage
 import 'home_page.dart'; // Import HomePage
-import 'config.dart'; // Import Config for API URL
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
+import 'package:intl/intl.dart'; // Import the intl package
+
 
 class FindEventsPage extends StatefulWidget {
   final String profileImage;
@@ -39,6 +39,13 @@ class _FindEventsPageState extends State<FindEventsPage> {
     _fetchEvents();
   }
 
+  // Add this helper method to format the date
+String _formatDate(String date) {
+  final DateTime parsedDate = DateTime.parse(date);
+  final DateFormat formatter = DateFormat('MMMM dd, yyyy'); // Desired format
+  return formatter.format(parsedDate);
+}
+
   Future<void> _fetchEvents() async {
     final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
 
@@ -53,7 +60,7 @@ class _FindEventsPageState extends State<FindEventsPage> {
             events = eventList.map((event) => {
               'id': event['id'],
               'name': event['name'],
-              'date': event['date'],
+              'date': _formatDate(event['date']),
               'location': event['location'],
             }).toList();
             isLoading = false;

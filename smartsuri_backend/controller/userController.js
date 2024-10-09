@@ -5,6 +5,19 @@ const dotenv = require('dotenv');
 const AuthService = require('../middleware/authToken');
 const getLogger = require('../utils/logger');
 
+const nodemailer = require('nodemailer');
+// In-memory storage for verification tokens
+const verificationTokens = {};
+
+// Configure nodemailer
+const transporter = nodemailer.createTransport({
+  service: 'gmail', 
+  auth: {
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS, 
+  },
+});
+
 dotenv.config();
 const logger = getLogger(__filename);
 
@@ -112,7 +125,7 @@ class UserController {
   }
 
   static async updateUsername(req, res) {
-    const userId = req.params.id;
+    const userId = req.user.id;
     const {username} = req.body;
 
     let transaction;
@@ -151,9 +164,55 @@ class UserController {
     }
   }
 
+  static async sendOTP(req, res) {
+    const { email } = req.body;
+    const requiredFields = ['email'];
+
+    // Validate required fields
+    const validationError = AuthService.validateFields(req.body, requiredFields);
+    if (validationError) {
+      return res.status(400).json(validationError);
+    }
+
+    try {
+      // Generate a verification code
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Send email with verification code
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Your Verification Code',
+        text: `Your verification code is: ${verificationCode}`,
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      // Store the verification code in the in-memory storage
+      verificationTokens[email] = verificationCode;
+
+      return res.status(200).json({ resultKey: true, message: 'Verification code sent to your email', resultCode: 200 });
+    } catch (error) {
+      logger.error(`Error during sending OTP: ${error.message}`);
+      return res.status(500).json({ resultKey: false, errorMessage: 'Server error', errorCode: 500 });
+    }
+  }
+
   static async updateEmail(req, res) {
-    const userId = req.params.id;
-    const {email, code} = req.body;
+    const userId = req.user.id;
+    const { email, code } = req.body;
+    const requiredFields = ['email', 'code'];
+
+    // Validate required fields
+    const validationError = AuthService.validateFields(req.body, requiredFields);
+    if (validationError) {
+      return res.status(400).json(validationError);
+    }
+
+    // Check if the verification code matches
+    if (verificationTokens[email] !== code) {
+      return res.status(400).json({ resultKey: false, errorMessage: 'Invalid verification code', errorCode: 400 });
+    }
 
     let transaction;
     try {
@@ -165,7 +224,7 @@ class UserController {
         return res.status(404).json({ resultKey: false, errorMessage: 'User not found', errorCode: 404 });
       }
 
-      // Update the user using model update method
+      // Update the user's email
       await user.update(
         {
           email,
@@ -175,6 +234,9 @@ class UserController {
 
       // Commit transaction
       await transaction.commit();
+
+      // Remove the verification code from in-memory storage
+      delete verificationTokens[email];
 
       // Fetch the updated user
       const updatedData = await User.findByPk(userId);
@@ -186,37 +248,13 @@ class UserController {
         await transaction.rollback();
       }
 
-      logger.error(`Error updating user: ${error.message}`, { stack: error.stack });
+      logger.error(`Error during updating email: ${error.message}`);
       return res.status(500).json({ resultKey: false, errorMessage: 'Server error', errorCode: 500 });
     }
-
-  }
-
-  //TO DO: Implement the verifyOTP method
-  static async verifyOTP(req, res) {
-    const { email } = req.body;
-    const requiredFields = ['email'];
-
-    // Validate required fields
-    const validationError = AuthService.validateFields(req.body, requiredFields);
-    if (validationError) {
-      return res.status(400).json(validationError);
-    }
-
-    try {
-      // Generate and send verification code
-      await AuthService.generateAndSendVerificationCode(email);
-
-      return res.status(200).json({ resultKey: true, message: 'Verification code sent to your email', resultCode: 200 });
-    } catch (error) {
-      logger.error(`Error during login: ${error.message}`);
-      return res.status(500).json({ resultKey: false, errorMessage: 'Server error', errorCode: 500 });
-    }
-
   }
 
   static async updateProfileInfo(req, res) {
-    const userId = req.params.id;
+    const userId = req.user.id;
     const {birthday, city, prof_img} = req.body;
 
     let transaction;
@@ -259,34 +297,37 @@ class UserController {
   }
 
   static async updatePassword(req, res) {
-    const userId = req.params.id;
+    const userId = req.user.id; 
+
     const { oldPassword, newPassword } = req.body;
 
-      // Validate required fields
-      const validationError = AuthService.validateFields(req.body, requiredFields);
-      if (validationError) {
-        return res.status(400).json(validationError);
-      }
-  
+    const requiredFields = ['oldPassword', 'newPassword'];
+
+    // Validate required fields
+    const validationError = AuthService.validateFields(req.body, requiredFields);
+    if (validationError) {
+      return res.status(400).json(validationError);
+    }
+
     let transaction;
     try {
       // Start transaction
       transaction = await sequelize.transaction();
-  
+
       const user = await User.findByPk(userId, { transaction });
       if (!user) {
         return res.status(404).json({ resultKey: false, errorMessage: 'User not found', errorCode: 404 });
       }
-  
+
       // Check if the old password matches the current password in the database
       const isMatch = await bcrypt.compare(oldPassword, user.password);
       if (!isMatch) {
         return res.status(400).json({ resultKey: false, errorMessage: 'Old password is incorrect', errorCode: 400 });
       }
-  
+
       // Hash the new password
       const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-  
+
       // Update the user using model update method
       await user.update(
         {
@@ -294,25 +335,24 @@ class UserController {
         },
         { transaction }
       );
-  
+
       // Commit transaction
       await transaction.commit();
-  
+
       // Fetch the updated user
       const updatedData = await User.findByPk(userId);
-  
+
       return res.json({ resultKey: true, user: updatedData, resultCode: 200 });
     } catch (error) {
       // Rollback transaction if not committed
       if (transaction && transaction.finished !== 'commit') {
         await transaction.rollback();
       }
-  
+
       logger.error(`Error updating user: ${error.message}`, { stack: error.stack });
       return res.status(500).json({ resultKey: false, errorMessage: 'Server error', errorCode: 500 });
     }
   }
-  
 }
 
 module.exports = UserController;

@@ -47,7 +47,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
         if (!uniqueEvents.contains(eventIdentifier)) {
           uniqueEvents.add(eventIdentifier);
-          final eventDate = DateTime.parse(date);
+          final eventDate = DateFormat('MMMM d, yyyy').parse(date);
           if (eventDate.isBefore(now)) {
             pastEvents.add({'name': name, 'date': date, 'location': location});
           } else {
@@ -60,9 +60,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
     setState(() {
       // Trigger UI update
     });
-
-    print('Loaded upcoming events: $upcomingEvents');
-    print('Loaded past events: $pastEvents');
   }
 
   @override
@@ -231,9 +228,16 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   // Helper function to build event tiles
   Widget _buildEventTile(BuildContext context, String title, String date, String location, IconData icon, {required bool past}) {
-    DateTime eventDate = DateTime.parse(date); // Parse ISO 8601 date string
-    String formattedDate = DateFormat('MMMM d, yyyy').format(eventDate); // Format to desired display format
-    bool isPast = eventDate.isBefore(now);
+    bool isPast = false;
+    
+    try {
+      // Attempt to parse the date string for comparison
+      DateTime eventDate = DateFormat('MMMM d, yyyy').parse(date);
+      isPast = eventDate.isBefore(now);
+    } catch (e) {
+      // Handle any errors in parsing and consider the event as not past
+      print('Error parsing date: $e');
+    }
 
     return ListTile(
       leading: Icon(
@@ -241,7 +245,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
         color: Colors.green[900],
       ),
       title: Text(title, style: const TextStyle(fontSize: 16)),
-      subtitle: Text('$formattedDate\n$location', style: const TextStyle(fontSize: 14)),
+      subtitle: Text('$date\n$location', style: const TextStyle(fontSize: 14)),
       isThreeLine: true,
     );
   }
