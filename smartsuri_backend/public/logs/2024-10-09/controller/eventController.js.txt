@@ -41,3 +41,37 @@
 2024-10-09T15:32:45.521Z [info] Events retrieved successfully 
 2024-10-09T15:32:53.158Z [info] Event retrieved successfully: Test Event 
 2024-10-09T15:33:26.183Z [info] Email sent to eilywow14@gmail.com regarding event: Test Event 
+2024-10-09T15:34:46.489Z [info] Event retrieved successfully: 8 
+2024-10-09T15:34:48.835Z [info] Email sent to eilywow14@gmail.com regarding event: 8 
+2024-10-09T15:35:45.428Z [info] Event created: cedy abnoy 
+2024-10-09T15:35:46.745Z [info] Events retrieved successfully 
+2024-10-09T15:38:14.399Z [info] Events retrieved successfully 
+2024-10-09T15:38:53.274Z [info] Event created: Cedy Abnoy 2 
+2024-10-09T15:38:54.596Z [info] Events retrieved successfully 
+2024-10-09T15:39:00.401Z [info] Events retrieved successfully 
+2024-10-09T15:43:52.456Z [info] Events retrieved successfully 
+2024-10-09T15:45:38.491Z [info] Events retrieved successfully 
+2024-10-09T15:46:16.790Z [info] Event created: Cedy Abnoy IX 
+2024-10-09T15:46:17.986Z [info] Events retrieved successfully 
+2024-10-09T15:47:47.702Z [info] Events retrieved successfully 
+2024-10-09T15:48:04.937Z [info] Event created: Eily 
+2024-10-09T15:48:06.338Z [info] Events retrieved successfully 
+2024-10-09T15:50:23.022Z [info] Events retrieved successfully 
+2024-10-09T15:50:39.404Z [info] Event created: eily 
+2024-10-09T15:50:40.610Z [info] Events retrieved successfully 
+2024-10-09T15:53:37.169Z [error] Error creating event: moment is not defined 
+2024-10-09T15:53:38.399Z [info] Events retrieved successfully 
+2024-10-09T15:54:07.292Z [info] Event created: Eily72 
+2024-10-09T15:54:08.545Z [info] Events retrieved successfully 
+2024-10-09T15:56:01.891Z [info] Event created: 1 
+2024-10-09T15:56:03.065Z [info] Events retrieved successfully 
+2024-10-09T15:56:14.148Z [info] Event created: 2 
+2024-10-09T15:56:15.392Z [info] Events retrieved successfully 
+2024-10-09T15:59:29.373Z [info] Event created: Ced 
+2024-10-09T15:59:51.961Z [info] Event created: Ced 
+2024-10-09T16:00:05.670Z [info] Event created: Ced 
+2024-10-09T16:00:59.796Z [info] Event created: Ced 
+2024-10-09T16:01:45.251Z [info] Event created: test 
+2024-10-09T16:01:46.535Z [info] Events retrieved successfully 
+2024-10-09T16:02:30.614Z [info] Event created: Cedy Abnoy 123 
+2024-10-09T16:02:32.125Z [info] Events retrieved successfully 

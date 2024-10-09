@@ -3,6 +3,7 @@ const { UniqueConstraintError } = require('sequelize');
 const dotenv = require('dotenv');
 const getLogger = require('../utils/logger');
 const nodemailer = require('nodemailer');
+const moment = require('moment');
 
 dotenv.config();
 const logger = getLogger(__filename);
@@ -10,20 +11,26 @@ const logger = getLogger(__filename);
 class EventController {
   static async createEvent(req, res) {
     const { name, date, location } = req.body;
-
+  
+    console.log(req.body);
+  
     if (!name || !date || !location) {
       return res.status(400).json({ message: 'Event name, date, and location are required' });
     }
-
+  
     try {
+      // Convert the date from 'MMMM D, YYYY' to 'YYYY-MM-DD HH:mm:ss'
+      const formattedDate = moment(date, 'MMMM D, YYYY').format('YYYY-MM-DD');
+  
+      console.log(formattedDate);
       // Create a new event record in the database
       const newEvent = await Event.create({
         name,
-        date,
+        date: formattedDate,
         location,
         isActive: true,
       });
-
+  
       logger.info(`Event created: ${newEvent.name}`);
       return res.status(200).json({
         resultKey: true,
@@ -37,7 +44,7 @@ class EventController {
         logger.error(`Error creating event: Event name already exists`);
         return res.status(409).json({ message: 'Event with the same name already exists' });
       }
-
+  
       // Log any other errors
       logger.error(`Error creating event: ${error.message}`);
       return res.status(500).json({ message: 'Internal server error', error: error.message });
@@ -46,20 +53,24 @@ class EventController {
 
   static async getEvent(req, res) {
     try {
-      // Fetch all events from the database
-      const events = await Event.findAll();
-
+      // Fetch all events from the database in descending order by id
+      const events = await Event.findAll({
+        order: [['id', 'DESC']]
+      });
+  
       // If no events are found, return a 404 status
       if (!events || events.length === 0) {
         return res.status(404).json({ message: 'No events found' });
       }
-
+  
       // Log the event retrieval
       logger.info('Events retrieved successfully');
-      return res.status(200).json({  resultKey: true,
+      return res.status(200).json({
+        resultKey: true,
         message: 'Event fetched successfully',
         resultCode: 200,
-        events});
+        events
+      });
     } catch (error) {
       // Log the error if something goes wrong
       logger.error(`Error fetching events: ${error.message}`);
