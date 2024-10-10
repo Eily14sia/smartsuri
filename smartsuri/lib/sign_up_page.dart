@@ -33,11 +33,17 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isPasswordHidden = true;
   bool _isConfirmPasswordHidden = true;
 
-  Future<bool> _sendDataToAPI() async {
+  bool isLoading = false;
+
+Future<bool> _sendDataToAPI() async {
   if (_formKey.currentState!.validate() && agreeToTerms) {
     final apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
 
     if (apiUrl.isNotEmpty) {
+      setState(() {
+        isLoading = true; // Show loading indicator
+      });
+
       try {
         final response = await http.post(
           Uri.parse('$apiUrl/crud/user/createUser'), // Adjust the endpoint if needed
@@ -52,28 +58,42 @@ class _SignUpPageState extends State<SignUpPage> {
             'prof_img': selectedProfileImage, // Directly use the Base64 string
           }),
         );
-       if (response.statusCode == 200) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign up successful!')));
+
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Sign up successful!')));
           return true; // Indicate success
         } else if (response.statusCode == 400) {
           // Handle case where the user already exists
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User already exists.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('User already exists.')));
           return false; // Indicate failure
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign up failed.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Sign up failed.')));
           return false; // Indicate failure
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('An error occurred.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('An error occurred.')));
         return false; // Indicate failure
+      } finally {
+        setState(() {
+          isLoading = false; // Hide loading indicator in both success and failure cases
+        });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('API URL is not configured.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('API URL is not configured.')));
+      setState(() {
+        isLoading = false; // Hide loading indicator
+      });
       return false; // Indicate failure
     }
   }
   return false; // Indicate failure if form validation or terms agreement fails
 }
+
 
  Future<void> _pickImageFromGallery() async {
     final ImagePicker picker = ImagePicker();
@@ -379,10 +399,19 @@ Widget _buildSignUpButton(BuildContext context) {
         padding: const EdgeInsets.symmetric(vertical: 15),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
-      child: const Text(
-        'Sign Up',
-        style: TextStyle(color: Colors.white, fontSize: 18), // White font color for button
-      ),
+      child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,  // Loader color
+                  strokeWidth: 2.0,
+                ),
+              )
+            : const Text(
+                'Sign Up',
+                style: TextStyle(color: Colors.white, fontSize: 18),  // White font color for button
+              ),
     ),
   );
 }

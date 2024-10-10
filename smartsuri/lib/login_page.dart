@@ -19,72 +19,61 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscureText = true;
   bool isLoading = false;
 
-  // Function to handle login request
-  Future<void> loginUser(String email, String password) async {
-    final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+// Function to handle login request
+Future<void> loginUser(String email, String password) async {
+  final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
 
-    if (apiUrl.isNotEmpty) {
-      setState(() {
-        isLoading = true; // Show loading indicator
-      });
-      
-      try {
-        var response = await http.post(
-          Uri.parse('$apiUrl/auth/login'),
-          headers: {"Content-Type": "application/json"},
-          body: json.encode({
-            'email': email,
-            'password': password,
-          }),
-        );
-        setState(() {
-              isLoading = false; // Hide loading indicator
-            });
+  if (apiUrl.isNotEmpty) {
+    setState(() {
+      isLoading = true; // Show loading indicator
+    });
 
-         if (response.statusCode == 200) {
-        // Handle successful login
+    try {
+      var response = await http.post(
+        Uri.parse('$apiUrl/auth/login'),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
         var jsonResponse = json.decode(response.body);
         print('Login successful: $jsonResponse');
 
-        // Navigate to VerificationPage with email and dummy profile data
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => VerificationPage(
-              profileImage: 'assets/default_profile.png', // Pass default or selected profile image
-              userName: 'YourUserName', // Pass user's name
-              email: email, // Pass email from the input
+              profileImage: 'assets/default_profile.png', // Default image
+              userName: 'YourUserName', // Default or fetched username
+              email: email,
             ),
           ),
         );
-      } else if (response.statusCode == 401) {
-        // Handle unauthorized error
-        print('Login failed with status: ${response.statusCode}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid email or password. Please try again.')),
-        );
       } else {
-        // Handle other errors
-        print('Login failed with status: ${response.statusCode}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed with status: ${response.statusCode}')),
-        );
+        String errorMessage = response.statusCode == 401
+            ? 'Invalid email or password. Please try again.'
+            : 'Login failed with status: ${response.statusCode}';
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMessage)));
       }
-      } catch (e) {
-        print('Error: $e');
-        // Show error message to user (optional)
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An error occurred: $e')),
-        );
-      }
-    } else {
-      print('API URL not found');
-      // Show error message to user (optional)
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('API URL not found')),
-      );
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
+    } finally {
+      setState(() {
+        isLoading = false; // Hide loading indicator
+      });
     }
+  } else {
+    print('API URL not found');
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('API URL not found')));
+    setState(() {
+      isLoading = false; // Hide loading indicator
+    });
   }
+}
 
   @override
   Widget build(BuildContext context) {

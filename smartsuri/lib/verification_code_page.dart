@@ -15,7 +15,8 @@ class VerificationCodePage extends StatefulWidget {
 
 class _VerificationCodePageState extends State<VerificationCodePage> {
   final TextEditingController codeController = TextEditingController();
-  bool isLoading = false;
+  bool isVerifying = false; // Separate loading state for verifying code
+  bool isResending = false; // Separate loading state for resending code
   String errorMessage = '';
   String? newToken; // Variable to hold the new token
 
@@ -32,7 +33,7 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
 
     if (apiUrl.isNotEmpty) {
       setState(() {
-        isLoading = true;
+        isVerifying = true;
         errorMessage = '';
       });
 
@@ -67,7 +68,7 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
         });
       } finally {
         setState(() {
-          isLoading = false;
+          isVerifying = false;
         });
       }
     } else {
@@ -82,7 +83,7 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
 
     if (apiUrl.isNotEmpty) {
       setState(() {
-        isLoading = true;
+        isResending = true;
         errorMessage = '';
       });
 
@@ -115,7 +116,7 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
         });
       } finally {
         setState(() {
-          isLoading = false;
+          isResending = false;
         });
       }
     } else {
@@ -201,7 +202,7 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
             const SizedBox(height: 10),
             // Verify Button
             ElevatedButton(
-              onPressed: _verifyCode,
+              onPressed: isVerifying ? null : _verifyCode, // Disable if loading
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
                 shape: RoundedRectangleBorder(
@@ -209,17 +210,19 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
                 ),
                 backgroundColor: Colors.green[900]!,
               ),
-              child: isLoading
+              child: isVerifying
                   ? const CircularProgressIndicator(color: Colors.white)
                   : const Text('Verify', style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(height: 20),
             TextButton(
-              onPressed: _resendVerificationCode,
-              child: Text(
-                'Send verification code again',
-                style: TextStyle(color: Colors.green[900]!),
-              ),
+              onPressed: isResending ? null : _resendVerificationCode, // Disable if loading
+              child: isResending
+                  ? const CircularProgressIndicator()
+                  : Text(
+                      'Send verification code again',
+                      style: TextStyle(color: Colors.green[900]!),
+                    ),
             ),
           ],
         ),

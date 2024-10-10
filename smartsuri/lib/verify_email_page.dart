@@ -2,65 +2,78 @@ import 'package:flutter/material.dart';
 import 'signup_success_page.dart';  // Import SignupSuccessPage
 import 'package:http/http.dart' as http;  // Import http package
 import 'package:flutter_dotenv/flutter_dotenv.dart';  // Import dotenv for environment variables
-import 'dart:convert'; 
+import 'dart:convert';
 
-class VerifyEmailPage extends StatelessWidget {
+class VerifyEmailPage extends StatefulWidget {
   final String email;  // Declare email as a final field
 
   const VerifyEmailPage({super.key, required this.email});  // Initialize email in the constructor
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController codeController = TextEditingController();
+  _VerifyEmailPageState createState() => _VerifyEmailPageState();
+}
 
-    Future<void> verifyEmail() async {
-      final String code = codeController.text;
-      final String apiUrl = dotenv.env['API_URL'] ?? '';  // Get API URL from env file
+class _VerifyEmailPageState extends State<VerifyEmailPage> {
+  final TextEditingController codeController = TextEditingController();
+  bool isLoading = false;
+  bool isResending = false;
 
-      if (apiUrl.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('API URL is not configured')),
-        );
-        return;
-      }
+  Future<void> verifyEmail() async {
+    final String code = codeController.text;
+    final String apiUrl = dotenv.env['API_URL'] ?? '';  // Get API URL from env file
 
-      final Uri url = Uri.parse('$apiUrl/crud/user/verifyEmail');  // Adjust the endpoint if needed
-
-      try {
-        final response = await http.post(
-          url,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            'email': email,
-            'code': code,
-          }),
-        );
-
-        if (response.statusCode == 200) {
-          // Handle successful response
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const SignupSuccessPage(),
-            ),
-          );
-        } else {
-          // Handle error response
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Verification failed: ${response.reasonPhrase}')),
-          );
-        }
-      } catch (e) {
-        // Handle network error
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Network error occurred')),
-        );
-      }
+    if (apiUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('API URL is not configured')),
+      );
+      return;
     }
 
-     Future<void> resendVerificationCode() async {
+    final Uri url = Uri.parse('$apiUrl/crud/user/verifyEmail');  // Adjust the endpoint if needed
+
+    setState(() {
+      isLoading = true;  // Show loading indicator
+    });
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'email': widget.email,
+          'code': code,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Handle successful response
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const SignupSuccessPage(),
+          ),
+        );
+      } else {
+        // Handle error response
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Verification failed: Email Existing ${response.reasonPhrase}')),
+        );
+      }
+    } catch (e) {
+      // Handle network error
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Network error occurred')),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;  // Hide loading indicator
+      });
+    }
+  }
+
+  Future<void> resendVerificationCode() async {
     final String apiUrl = dotenv.env['API_URL'] ?? '';  // Get API URL from env file
 
     if (apiUrl.isEmpty) {
@@ -72,6 +85,10 @@ class VerifyEmailPage extends StatelessWidget {
 
     final Uri url = Uri.parse('$apiUrl/auth/resendCode');  // Adjust the endpoint if needed
 
+    setState(() {
+      isResending = true;  // Show loading indicator for resending
+    });
+
     try {
       final response = await http.post(
         url,
@@ -79,7 +96,7 @@ class VerifyEmailPage extends StatelessWidget {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'email': email,
+          'email': widget.email,
         }),
       );
 
@@ -99,9 +116,15 @@ class VerifyEmailPage extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Network error occurred')),
       );
+    } finally {
+      setState(() {
+        isResending = false;  // Hide loading indicator for resending
+      });
     }
   }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -116,7 +139,6 @@ class VerifyEmailPage extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // Background: plain white for a cleaner look
           Container(
             color: Colors.white,
           ),
@@ -174,12 +196,9 @@ class VerifyEmailPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 30),
-                // Verify Button
+                // Verify Button with loading indicator
                 ElevatedButton(
-                  onPressed: () {
-                    // Call _verifyEmail when button is pressed
-                    verifyEmail();
-                  },
+                  onPressed: isLoading ? null : () => verifyEmail(),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                     shape: RoundedRectangleBorder(
@@ -187,24 +206,38 @@ class VerifyEmailPage extends StatelessWidget {
                     ),
                     backgroundColor: Colors.green[900]!,
                   ),
-                  child: const Text(
-                    'VERIFY',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.0,
+                          ),
+                        )
+                      : const Text(
+                          'VERIFY',
+                          style: TextStyle(color: Colors.white),
+                        ),
                 ),
                 const SizedBox(height: 20),
-                // Option to resend the code
-                 TextButton(
-                  onPressed: () {
-                    // Call _resendVerificationCode when button is pressed
-                    resendVerificationCode();
-                  },
-                  child: Text(
-                    'Resend Code?',
-                    style: TextStyle(color: Colors.green[900]!),
-                  ),
+                // Resend code button with loading indicator
+                TextButton(
+                  onPressed: isResending ? null : () => resendVerificationCode(),
+                  child: isResending
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.green,
+                            strokeWidth: 2.0,
+                          ),
+                        )
+                      : Text(
+                          'Resend Code?',
+                          style: TextStyle(color: Colors.green[900]!),
+                        ),
                 ),
-                const SizedBox(height: 20),
               ],
             ),
           ),

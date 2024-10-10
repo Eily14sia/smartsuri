@@ -16,7 +16,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   bool isLoading = false;
   String errorMessage = '';
 
- Future<void> _sendVerificationCode() async {
+  Future<void> _sendVerificationCode() async {
     final String email = emailController.text;
     final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from .env file
 
@@ -75,7 +75,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,7 +89,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           },
         ),
       ),
-      body: Center(  // Updated to center all the elements
+      body: Center(  // Center all the elements
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -144,9 +144,20 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ),
             ),
             const SizedBox(height: 30),
-            // Send Verification Code Button with white text
+            // Error message display
+            if (errorMessage.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                child: Text(
+                  errorMessage,
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            const SizedBox(height: 10),
+            // Send Verification Code Button with circular progress indicator
             ElevatedButton(
-              onPressed: _sendVerificationCode,
+              onPressed: isLoading ? null : _sendVerificationCode,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
                 shape: RoundedRectangleBorder(
@@ -154,10 +165,19 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
                 backgroundColor: Colors.green[900]!,
               ),
-              child: const Text(
-                'Send Verification Code',
-                style: TextStyle(color: Colors.white),  // White text
-              ),
+              child: isLoading
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.0,
+                      ),
+                    )
+                  : const Text(
+                      'Send Verification Code',
+                      style: TextStyle(color: Colors.white), // White text
+                    ),
             ),
           ],
         ),
