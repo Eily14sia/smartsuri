@@ -3,10 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-// import 'package:smartsuri/events_button.dart'; 
 import 'package:smartsuri/find_events_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 class AddEventPage extends StatefulWidget {
   final Function(Map<String, String>) onEventAdded;
@@ -22,6 +20,7 @@ class _AddEventPageState extends State<AddEventPage> {
   String _eventName = '';
   String _eventDate = '';
   String _selectedCity = '';
+  String _eventDetails = '';
 
   final List<String> _cities = [
     'Caloocan', 'Las Piñas', 'Makati', 'Malabon', 'Mandaluyong', 'Manila',
@@ -29,48 +28,48 @@ class _AddEventPageState extends State<AddEventPage> {
     'Quezon City', 'San Juan', 'Taguig', 'Valenzuela'
   ];
 
- Future<void> _sendEventToApi(Map<String, String> event) async {
-  final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
+  Future<void> _sendEventToApi(Map<String, String> event) async {
+    final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
 
-  if (apiUrl.isNotEmpty) {
-    try {
-      var response = await http.post(
-        Uri.parse('$apiUrl/crud/event/createEvent'),
-        headers: {"Content-Type": "application/json"},
-        body: json.encode(event),
-      );
-
-      if (response.statusCode == 200) {
-        // Successfully sent the event
-        var jsonResponse = json.decode(response.body);
-        print('Event added successfully: $jsonResponse');
-        
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Event added successfully')),
-            );
-        
-      } else {
-        // Handle other errors
-        print('Failed to add event with status: ${response.statusCode}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add event with status: ${response.statusCode}')),
+    if (apiUrl.isNotEmpty) {
+      try {
+        var response = await http.post(
+          Uri.parse('$apiUrl/crud/event/createEvent'),
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(event),
         );
-            }
-    } catch (e) {
-      print('Error: $e');
+
+        if (response.statusCode == 200) {
+          // Successfully sent the event
+          var jsonResponse = json.decode(response.body);
+          print('Event added successfully: $jsonResponse');
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Event added successfully')),
+          );
+          
+        } else {
+          // Handle other errors
+          print('Failed to add event with status: ${response.statusCode}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to add event with status: ${response.statusCode}')),
+          );
+        }
+      } catch (e) {
+        print('Error: $e');
+        // Show error message to user (optional)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred: $e')),
+        );
+      }
+    } else {
+      print('API URL not found');
       // Show error message to user (optional)
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: $e')),
+        const SnackBar(content: Text('API URL not found')),
       );
-        }
-  } else {
-    print('API URL not found');
-    // Show error message to user (optional)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('API URL not found')),
-    );
     }
-}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -184,15 +183,39 @@ class _AddEventPageState extends State<AddEventPage> {
                   return null;
                 },
               ),
+              const SizedBox(height: 16),
+              // Event Details Text Field
+              TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Event Details',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.green[900]!),
+                  ),
+                ),
+                maxLines: 5, // Allow multiple lines for paragraph input
+                onChanged: (value) {
+                  setState(() {
+                    _eventDetails = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter event details';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 20),
               // Save Event Button
-            ElevatedButton(
+              ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState?.validate() ?? false) {
                     Map<String, String> newEvent = {
                       'name': _eventName,
                       'date': _eventDate,
                       'location': _selectedCity,
+                      'details': _eventDetails,
                     };
                     await _sendEventToApi(newEvent); // Send the event to the API
                     widget.onEventAdded(newEvent);
@@ -202,7 +225,7 @@ class _AddEventPageState extends State<AddEventPage> {
                     );
                     // Delay the navigation to ensure the SnackBar is shown
                     await Future.delayed(const Duration(seconds: 1));
-                   if (mounted) {
+                    if (mounted) {
                       // Retrieve the stored values from SharedPreferences
                       final prefs = await SharedPreferences.getInstance();
                       final profileImage = prefs.getString('profileImage') ?? '';

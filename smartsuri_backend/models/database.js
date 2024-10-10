@@ -73,6 +73,10 @@ const Event = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    details: {
+      type: DataTypes.TEXT('long'),
+      allowNull: false,
+    },
     isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

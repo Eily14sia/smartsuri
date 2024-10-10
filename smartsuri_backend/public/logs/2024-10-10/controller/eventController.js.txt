@@ -1,0 +1,21 @@
+2024-10-10T13:26:50.133Z [error] Error creating event: desc is not defined 
+2024-10-10T13:28:32.886Z [info] Event created: TEsting EVent 
+2024-10-10T13:29:05.989Z [info] Emails sent to barveilyengco1214@gmail.com, eilywow14@gmail.com, glynserbi.study@gmail.com regarding event: TEsting EVent 
+2024-10-10T13:29:07.141Z [info] Events retrieved successfully 
+2024-10-10T13:35:47.927Z [info] Event created: Cedy Abnoy 2 
+2024-10-10T13:35:49.095Z [info] Events retrieved successfully 
+2024-10-10T13:36:20.890Z [info] Emails sent to barveilyengco1214@gmail.com, eilywow14@gmail.com, glynserbi.study@gmail.com regarding event: Cedy Abnoy 2 
+2024-10-10T13:36:48.097Z [info] Event retrieved successfully: Cedy Abnoy 2 
+2024-10-10T13:41:20.792Z [info] Events retrieved successfully 
+2024-10-10T13:41:35.287Z [info] Event created: Hellow 2 
+2024-10-10T13:41:36.410Z [info] Events retrieved successfully 
+2024-10-10T13:41:48.286Z [info] Event retrieved successfully: Hellow 2 
+2024-10-10T13:41:57.428Z [info] Event retrieved successfully: Cedy Abnoy 2 
+2024-10-10T13:42:05.503Z [info] Event retrieved successfully: TEsting EVent 
+2024-10-10T13:42:08.119Z [info] Emails sent to barveilyengco1214@gmail.com, eilywow14@gmail.com, glynserbi.study@gmail.com regarding event: Hellow 2 
+2024-10-10T13:42:10.686Z [info] Event retrieved successfully: Cedy Abnoy 2 
+2024-10-10T13:43:11.481Z [info] Event retrieved successfully: Cedy Abnoy 2 
+2024-10-10T13:43:58.290Z [info] Event retrieved successfully: Cedy Abnoy 2 
+2024-10-10T13:44:42.790Z [info] Event retrieved successfully: Cedy Abnoy 2 
+2024-10-10T13:46:11.219Z [info] Events retrieved successfully 
+2024-10-10T13:46:14.568Z [info] Event retrieved successfully: TEsting EVent 

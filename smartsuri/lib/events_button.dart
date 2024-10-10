@@ -64,11 +64,11 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
   Future<void> _getEventByID(String eventID) async {
     final prefs = await SharedPreferences.getInstance();
     final String? accessToken = prefs.getString('access_token');
-    final String? email = prefs.getString('email');
+ 
 
     final String apiUrl = dotenv.env['API_URL'] ?? ''; // Get API URL from env file
 
-    if (accessToken == null || email == null) {
+    if (accessToken == null ) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Access token or email not found')),
       );
@@ -82,13 +82,11 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: json.encode({'email': email}),
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        // Handle the response as needed
-        print('Event details: $jsonResponse');
+
       } else {
         print('Failed to load event with status: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -104,11 +102,12 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
   }
 
  // Method to store event details in shared preferences
-  Future<void> _storeEventDetails(String id, String name, String date, String location) async {
+  Future<void> _storeEventDetails(String id, String name, String date, String location, String details) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('event_${id}_name', name);
     await prefs.setString('event_${id}_date', date);
     await prefs.setString('event_${id}_location', location);
+    await prefs.setString('event_${id}_details', details);
 
   }
 
@@ -210,6 +209,7 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
                     event['date']!,
                     event['location']!,
                     index,
+                    event['details']!,
                   );
                 },
               ),
@@ -220,7 +220,7 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
     );
   }
 
-  Widget _buildEventCard(BuildContext context, String id, String title, String date, String location, int index) {
+  Widget _buildEventCard(BuildContext context, String id, String title, String date, String location, int index, String details) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -255,7 +255,7 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
           onPressed: () {
             if (!eventAdded[index]) {
               _getEventByID(id); // Call the getEventByID API with the event ID
-              _showConfirmationDialog(context, title, date, location, index, id); // Show confirmation dialog with event ID
+              _showConfirmationDialog(context, title, date, location, index, id, details); // Show confirmation dialog with event ID
             }
           },
           style: ElevatedButton.styleFrom(
@@ -271,7 +271,7 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
     );
   }
 
-  void _showConfirmationDialog(BuildContext context, String title, String date, String location, int index, String id) {
+  void _showConfirmationDialog(BuildContext context, String title, String date, String location, int index, String id, String details) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -297,6 +297,11 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
                   Text(location),
                 ],
               ),
+              Text(
+                details,
+                style: const TextStyle(fontStyle: FontStyle.italic),
+              ),
+              const SizedBox(height: 8),
             ],
           ),
           actions: <Widget>[
@@ -313,7 +318,7 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
                 });
                 _saveEventAddedState();
                 Navigator.of(context).pop(); // Close dialog
-                _showEventJoinedDialog(context, title, date, location, index, id); // Show event joined confirmation
+                _showEventJoinedDialog(context, title, date, location, index, id, details); // Show event joined confirmation
               },
               child: const Text('Yes'),
             ),
@@ -323,7 +328,7 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
     );
   }
 
-  void _showEventJoinedDialog(BuildContext context, String title, String date, String location, int index, String id) {
+  void _showEventJoinedDialog(BuildContext context, String title, String date, String location, int index, String id, String details) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -349,6 +354,11 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
                   Text(location),
                 ],
               ),
+              Text(
+                details,
+                style: const TextStyle(fontStyle: FontStyle.italic),
+              ),
+              const SizedBox(height: 8),
               const SizedBox(height: 10),
               const Text(
                 'We look forward to seeing you! Thank you for your advanced participation!',
@@ -362,7 +372,7 @@ class _EventsButtonPageState extends State<EventsButtonPage> {
                 setState(() {
                   eventAdded[index] = true; // Update the button text
                 });
-                _storeEventDetails(id, title, date, location); // Store event details in shared preferences
+                _storeEventDetails(id, title, date, location, details); // Store event details in shared preferences
                 Navigator.of(context).pop(); // Close dialog
               },
               child: const Text('Close'),

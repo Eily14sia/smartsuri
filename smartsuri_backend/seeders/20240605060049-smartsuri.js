@@ -24,7 +24,7 @@ module.exports = {
               // Insert data into Events table
       await queryInterface.sequelize.query(`
         INSERT INTO \`events\` VALUES 
-        (1, 'Test Event', '2024-09-10 05:47:07', 'Manila', 1, '2024-09-10 11:47:38', '2024-09-10 13:56:02', NULL, NULL, NULL)
+        (1, 'Test Event', '2024-09-10 05:47:07', 'Manila', 'Testing Event description', 1, '2024-09-10 11:47:38', '2024-09-10 13:56:02', NULL, NULL, NULL)
         `)
 
       // Insert data into LogMaster table

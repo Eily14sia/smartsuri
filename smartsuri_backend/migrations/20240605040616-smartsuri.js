@@ -78,6 +78,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      details: {
+        type: Sequelize.TEXT('long'),
+        allowNull: true,
+      },
       isActive: {
         type: Sequelize.BOOLEAN,
         allowNull: false,

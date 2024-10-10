@@ -61,7 +61,7 @@ Future<bool> _sendDataToAPI() async {
 
         if (response.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Sign up successful!')));
+              const SnackBar(content: Text('Enter Verification Code to Continue.')));
           return true; // Indicate success
         } else if (response.statusCode == 400) {
           // Handle case where the user already exists
